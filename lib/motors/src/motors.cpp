@@ -11,11 +11,13 @@ bool usingMotors = true;
 float lMotorInput, rMotorInput;
 
 void setupMotors() {
-    pinMode(PINOUT_M_PWML, OUTPUT);
-    pinMode(PINOUT_M_PWMR, OUTPUT);
+    pinMode(PINOUT_ML_PWM, OUTPUT);
+    pinMode(PINOUT_MR_PWM, OUTPUT);
 
-    pinMode(PINOUT_M_DIRF, OUTPUT);
-    pinMode(PINOUT_M_DIRB, OUTPUT);
+    pinMode(PINOUT_ML_DIRF, OUTPUT);
+    pinMode(PINOUT_ML_DIRB, OUTPUT);
+    pinMode(PINOUT_MR_DIRF, OUTPUT);
+    pinMode(PINOUT_MR_DIRB, OUTPUT);
 
     lMotorInput = 0;
     rMotorInput = 0;
@@ -23,14 +25,26 @@ void setupMotors() {
     // moveLR(0, 0);
 }
 
-void setMotorDir(bool front) {
-    if(front) {
-        digitalWrite(PINOUT_M_DIRB, 0);
-        digitalWrite(PINOUT_M_DIRF, 1);
+void setMotorDir(Motor_t motor, bool front) {
+    if(motor == Motor_t::left) {
+        if(front) {
+            digitalWrite(PINOUT_ML_DIRB, 0);
+            digitalWrite(PINOUT_ML_DIRF, 1);
+        }
+        else {
+            digitalWrite(PINOUT_ML_DIRB, 1);
+            digitalWrite(PINOUT_ML_DIRF, 0);
+        }
     }
     else {
-        digitalWrite(PINOUT_M_DIRB, 1);
-        digitalWrite(PINOUT_M_DIRF, 0);
+        if(front) {
+            digitalWrite(PINOUT_MR_DIRB, 0);
+            digitalWrite(PINOUT_MR_DIRF, 1);
+        }
+        else {
+            digitalWrite(PINOUT_MR_DIRB, 1);
+            digitalWrite(PINOUT_MR_DIRF, 0);
+        }
     }
 }
 
@@ -119,7 +133,7 @@ void updateMotor(Motor_t motor) {
         speed = rMotorInput;
 
 
-    setMotorDir((speed > 0));
+    setMotorDir(motor, (speed > 0));
     
     // get the absolute value of the speed
     if(speed < 0)
@@ -133,24 +147,14 @@ void updateMotor(Motor_t motor) {
     speed *= MAX_PWM_OUTPUT;
 
     if(motor == Motor_t::left)
-        analogWrite(PINOUT_M_PWML, (int)speed);
+        analogWrite(PINOUT_ML_PWM, (int)speed);
     else if(motor == Motor_t::right)
-        analogWrite(PINOUT_M_PWMR, (int)speed);
+        analogWrite(PINOUT_MR_PWM, (int)speed);
 }
 
 void updateMotors() {
     if(!usingMotors)
         return;
-
-    // opposite directions are not currently possible
-    // if they are requested, set the backwards driving motor to stopped
-    // TODO: remove this once different directions are possible
-    if(lMotorInput*rMotorInput < 0) {
-        if(rMotorInput < 0)
-            rMotorInput = 0;
-        else
-            lMotorInput = 0;
-    }
 
     updateMotor(Motor_t::left);
     updateMotor(Motor_t::right);    

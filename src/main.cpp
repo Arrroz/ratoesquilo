@@ -7,8 +7,8 @@
 #include <motors.hpp>
 #include <encoders.hpp>
 
-// #define TESTING
-#define CALIBRATING
+#define TESTING
+// #define CALIBRATING
 
 #ifdef TESTING
 #include "tests.hpp"
@@ -90,6 +90,10 @@ void loop() {
         // testLineSensors();
         // testEncoders();
         // testMotors(currTime);
+
+        // lMotorInput = 1.0;
+        // rMotorInput = 1.0;
+        // updateMotors();
 
     #elif defined(CALIBRATING)
 
