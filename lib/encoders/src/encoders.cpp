@@ -64,9 +64,9 @@ void setupEncoders() {
 }
 
 void updateEncoderSpeeds(float dt) {
-    speedL = countL * ENC_COUNT2DIST / dt;
+    speedL = countL / (ENC_PULSES_PER_METER * dt);
     countL = 0;
     
-    speedR = countR * ENC_COUNT2DIST / dt;
+    speedR = countR / (ENC_PULSES_PER_METER * dt);
     countR = 0;
 }

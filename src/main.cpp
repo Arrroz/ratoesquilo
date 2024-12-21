@@ -20,7 +20,6 @@
 #define TIME_INTERVAL 0.003 // in seconds
 unsigned long currTime, prevTime;
 
-// TODO: retest everything and test all calibration routines
 // TODO: add dipswitch and use it to determine which test/calibration routine runs
 // TODO: test motor lib changes
 // TODO: change libraries to work with objects instead of poluting the main namespace with variables specific to this robot
@@ -28,7 +27,7 @@ unsigned long currTime, prevTime;
 // TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
 // TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
 // TODO: test line sensors with a different number of sensors
-// TODO: test light sensor (currently not working)
+// TODO: test light sensor (currently not working) and it's calibration routine
 
 #define BASE_SPEED 0.4
 #define KP 5
@@ -91,13 +90,9 @@ void loop() {
         // testEncoders();
         // testMotors(currTime);
 
-        // lMotorInput = 1.0;
-        // rMotorInput = 1.0;
-        // updateMotors();
-
     #elif defined(CALIBRATING)
 
-        calibrateLineSensors();
+        // calibrateLineSensors();
         // calibrateLightSensor();
         // calibrateEncoders();
 

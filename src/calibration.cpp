@@ -1,6 +1,8 @@
 #include "calibration.hpp"
 
 void calibrateLineSensors() {
+    Serial.println("Calibrating Line Sensors...");
+
     lineSensors.resetCalibration();
     for(uint16_t i = 0; i < 400; i++)
         lineSensors.calibrate();
@@ -32,8 +34,8 @@ void calibrateEncoders() {
 
     updateEncoderSpeeds();
 
-    countL += speedL / ENC_COUNT2DIST;
-    countR += speedR / ENC_COUNT2DIST;
+    countL += speedL * ENC_PULSES_PER_METER;
+    countR += speedR * ENC_PULSES_PER_METER;
 
     displayPrint(countL, "  ", countR);
 }
