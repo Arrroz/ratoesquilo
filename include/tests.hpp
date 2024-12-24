@@ -4,6 +4,8 @@
 #include <encoders.hpp>
 #include <motors.hpp>
 
+#define NUM_TESTS 5
+
 void testDisplay(unsigned long time);
 void testLightSensor();
 void testLineSensors();

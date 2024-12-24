@@ -22,8 +22,7 @@
 #define PINOUT_ENC_RB 50
 
 #define PINOUT_DIPSWITCH (const uint8_t[]){32, 33, 34, 35}
-#define PINOUT_BTN1 36
-#define PINOUT_BTN2 37
+#define PINOUT_BTNS (const uint8_t[]){36, 37}
 #define PINOUT_DEBUG_SW 38
 
 #endif

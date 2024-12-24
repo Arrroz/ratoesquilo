@@ -15,10 +15,12 @@ enum Mode_t {
 };
 Mode_t mode;
 
+int testNum = 0, calibNum = 0;
+
 #define TIME_INTERVAL 0.003 // in seconds
 unsigned long currTime, prevTime;
 
-// TODO: add dipswitch and use it to determine which test/calibration routine runs
+// TODO: redo line calibration routine so all routines can be cycled with buttons
 // TODO: change libraries to work with objects instead of poluting the main namespace with variables specific to this robot
 // TODO: make constructors take the appropriate pins for initialization without including connections.hpp
 // TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
@@ -90,34 +92,86 @@ void loop() {
     prevTime = currTime;
 
     switch(mode) {
-        case race:
-            // static unsigned long t0, t1;
-            // t0 = micros();
-            control();
-            // t1 = micros();
-            // Serial.println(t1-t0);
-            
-            break;
+    case race:
+        // static unsigned long t0, t1;
+        // t0 = micros();
+        control();
+        // t1 = micros();
+        // Serial.println(t1-t0);
         
-        case test:
+        break;
+    
+    case test:
+        // Cycle between tests with button presses
+        readButtons();
+        if(btnTriggered[0]) testNum++;
+        if(btnTriggered[1]) testNum--;
+
+        switch (testNum) {
+        case 0:
             testDisplay(currTime);
-            // testLightSensor();
-            // testLineSensors();
-            // testEncoders();
-            // testMotors(currTime);
-
             break;
         
-        case calib:
-            // calibrateLineSensors();
-            // calibrateLightSensor();
-            calibrateEncoders();
+        case 1:
+            testLightSensor();
+            break;
+        
+        case 2:
+            testLineSensors();
+            break;
+        
+        case 3:
+            testEncoders();
+            break;
 
+        case 4:
+            testMotors(currTime);
             break;
         
         default:
-            displayPrint("Unknown mode");
-
+            // if the testNum is out of bounds, get it back in
+            testNum = (testNum + NUM_TESTS) % NUM_TESTS;
             break;
+        }
+
+        // Disable motors if their test is not running
+        if(testNum != 4) {
+            lMotorInput = 0;
+            rMotorInput = 0;
+            updateMotors();
+        }
+
+        break;
+    
+    case calib:
+        // Cycle between calibration routines with button presses
+        readButtons();
+        if(btnTriggered[0]) calibNum++;
+        if(btnTriggered[1]) calibNum--;
+
+        switch(calibNum) {
+        case 0:
+            calibrateLineSensors();
+            break;
+        
+        case 1:
+            calibrateLightSensor();
+            break;
+        
+        case 2:
+            calibrateEncoders();
+            break;
+        
+        default:
+            // if the calibNum is out of bounds, get it back in
+            calibNum = (calibNum + NUM_CALIBS) % NUM_CALIBS;
+            break;
+        }
+
+        break;
+    
+    default:
+        displayPrint("Unknown mode");
+        break;
     }
 }
