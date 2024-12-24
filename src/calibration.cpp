@@ -45,13 +45,13 @@ void calibrateLightSensor() {
 }
 
 void calibrateEncoders() {
-    static int16_t countL = 0;
-    static int16_t countR = 0;
+    // static int16_t countL = 0;
+    // static int16_t countR = 0;
 
-    updateEncoderSpeeds();
+    // updateEncoderSpeeds();
 
-    countL += speedL * ENC_PULSES_PER_METER;
-    countR += speedR * ENC_PULSES_PER_METER;
+    // countL += speedL * ENC_PULSES_PER_METER;
+    // countR += speedR * ENC_PULSES_PER_METER;
 
-    display.printAll(countL, "  ", countR);
+    display.printAll(encoderL.count, "  ", encoderR.count);
 }

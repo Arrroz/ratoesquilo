@@ -2,14 +2,20 @@
 #define ENCODER_H_
 
 #include <Arduino.h>
-#include <connections.hpp>
 #include <PinChangeInterrupt.h>
 
-#define ENC_PULSES_PER_METER 1575
+class Encoder {
+public:
+    Encoder(uint8_t pinA, uint8_t pinB);
+    void updateSpeed(float dt = 1);
 
-extern float speedL, speedR;
+    float speed;
+    volatile int16_t count;
+    volatile uint8_t state;
 
-void setupEncoders();
-void updateEncoderSpeeds(float dt = 1);
+    uint8_t pinA, pinB;
+
+    bool enabled;
+};
 
 #endif

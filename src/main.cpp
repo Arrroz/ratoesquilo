@@ -11,6 +11,8 @@
 #include "calibration.hpp"
 
 Display display;
+Encoder encoderL(PINOUT_ENC_LA, PINOUT_ENC_LB);
+Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
 
 enum Mode_t {
     race, test, calib
@@ -68,7 +70,7 @@ void setup() {
     setupInterface();
     setupLightSensor();
     setupLineSensors();
-    setupEncoders();
+    // setupEncoders();
     setupMotors();
     
     delay(500);

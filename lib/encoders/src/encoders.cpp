@@ -1,5 +1,7 @@
 #include "encoders.hpp"
 
+#define ENC_PULSES_PER_METER 1575
+
 /* Transition Table:
 00 -> 01 -> 11 -> 10 -> 00 (positive direction)
 
@@ -23,50 +25,36 @@
 
 #define TRANSITION_TABLE (const int8_t[]){0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0}
 
-bool usingEncoders = true;
+// WARNING: this is ugly (declaration inside the library),
+// but required for the ISR to handle both encoders at once
+extern Encoder encoderL, encoderR;
 
-volatile uint8_t stateL, stateR;
-volatile int16_t countL, countR;
-
-float speedL, speedR;
-
+// WARNING: assumes the existence of 2 encoders (left & right) to prevent overhead from loops
 void encodersISR() {
-    stateL = (stateL << 2) & 0b1100;
-    stateR = (stateR << 2) & 0b1100;
-    stateL += (digitalRead(PINOUT_ENC_LA) << 1) + digitalRead(PINOUT_ENC_LB);
-    stateR += (digitalRead(PINOUT_ENC_RA) << 1) + digitalRead(PINOUT_ENC_RB);
+    encoderL.state = (encoderL.state << 2) & 0b1100;
+    encoderR.state = (encoderR.state << 2) & 0b1100;
+    encoderL.state += (digitalRead(encoderL.pinA) << 1) + digitalRead(encoderL.pinB);
+    encoderR.state += (digitalRead(encoderR.pinA) << 1) + digitalRead(encoderR.pinB);
 
-    countL += TRANSITION_TABLE[stateL];
-    countR += TRANSITION_TABLE[stateR];
+    encoderL.count += TRANSITION_TABLE[encoderL.state];
+    encoderR.count += TRANSITION_TABLE[encoderR.state];
 }
 
-void setupEncoders() {
-    pinMode(PINOUT_ENC_LA, INPUT);
-    pinMode(PINOUT_ENC_LB, INPUT);
-    pinMode(PINOUT_ENC_RA, INPUT);
-    pinMode(PINOUT_ENC_RB, INPUT);
+Encoder::Encoder(uint8_t pinA, uint8_t pinB) : pinA(pinA), pinB(pinB) {
+    pinMode(pinA, INPUT);
+    pinMode(pinB, INPUT);
 
-    attachPCINT(digitalPinToPCINT(PINOUT_ENC_LA), encodersISR, CHANGE);
-    attachPCINT(digitalPinToPCINT(PINOUT_ENC_LB), encodersISR, CHANGE);
-    attachPCINT(digitalPinToPCINT(PINOUT_ENC_RA), encodersISR, CHANGE);
-    attachPCINT(digitalPinToPCINT(PINOUT_ENC_RB), encodersISR, CHANGE);
-    
-    stateL = (digitalRead(PINOUT_ENC_LA) << 1) + digitalRead(PINOUT_ENC_LB);
-    stateR = (digitalRead(PINOUT_ENC_RA) << 1) + digitalRead(PINOUT_ENC_RB); 
-    stateL = (stateL << 2) + stateL;
-    stateR = (stateR << 2) + stateR;
+    attachPCINT(digitalPinToPCINT(pinA), encodersISR, CHANGE);
+    attachPCINT(digitalPinToPCINT(pinB), encodersISR, CHANGE);
 
-    countL = 0;
-    countR = 0;
+    speed = 0;
+    count = 0;
 
-    speedL = 0;
-    speedR = 0;
+    state = (digitalRead(pinA) << 1) + digitalRead(pinB);
+    state = (state << 2) + state;
 }
 
-void updateEncoderSpeeds(float dt) {
-    speedL = countL / (ENC_PULSES_PER_METER * dt);
-    countL = 0;
-    
-    speedR = countR / (ENC_PULSES_PER_METER * dt);
-    countR = 0;
+void Encoder::updateSpeed(float dt) {
+    speed = count / (ENC_PULSES_PER_METER * dt);
+    count = 0;
 }

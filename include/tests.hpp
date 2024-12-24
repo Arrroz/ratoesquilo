@@ -7,6 +7,7 @@
 #define NUM_TESTS 5
 
 extern Display display;
+extern Encoder encoderL, encoderR;
 
 void testDisplay(unsigned long time);
 void testLightSensor();

@@ -6,6 +6,7 @@
 #define NUM_CALIBS 3
 
 extern Display display;
+extern Encoder encoderL, encoderR;
 
 void calibrateLineSensors();
 void calibrateLightSensor();

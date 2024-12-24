@@ -65,9 +65,10 @@ void testLineSensors() {
 void testEncoders() {
     static float distL = 0, distR = 0;
 
-    updateEncoderSpeeds();
-    distL += speedL;
-    distR += speedR;
+    encoderL.updateSpeed();
+    encoderR.updateSpeed();
+    distL += encoderL.speed;
+    distR += encoderR.speed;
 
     display.printAll(distL, " ", distR);
     Serial.print(distL);
