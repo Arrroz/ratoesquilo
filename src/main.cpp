@@ -1,27 +1,24 @@
 #include <Arduino.h>
 
+#include <interface.hpp>
 #include <display.hpp>
-#include <encoders.hpp>
 #include <light_sensor.hpp>
 #include <line_sensors.hpp>
-#include <motors.hpp>
 #include <encoders.hpp>
+#include <motors.hpp>
 
-#define TESTING
-// #define CALIBRATING
-
-#ifdef TESTING
 #include "tests.hpp"
-#endif
-#ifdef CALIBRATING
 #include "calibration.hpp"
-#endif
+
+enum Mode_t {
+    race, test, calib
+};
+Mode_t mode;
 
 #define TIME_INTERVAL 0.003 // in seconds
 unsigned long currTime, prevTime;
 
 // TODO: add dipswitch and use it to determine which test/calibration routine runs
-// TODO: test motor lib changes
 // TODO: change libraries to work with objects instead of poluting the main namespace with variables specific to this robot
 // TODO: make constructors take the appropriate pins for initialization without including connections.hpp
 // TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
@@ -53,10 +50,10 @@ void control() {
     rMotorInput = BASE_SPEED + speedDiff;
 
     updateMotors();
-    // moveLR(leftSpeed, rightSpeed);
 }
 
 void setup() {
+    // Hardware setup
     setupDisplay();
 
     displayPrint("Setting up");
@@ -64,12 +61,22 @@ void setup() {
     Serial.begin(9600);
     while(!Serial);
 
+    setupInterface();
     setupLightSensor();
     setupLineSensors();
     setupEncoders();
     setupMotors();
     
     delay(500);
+
+    // Program initialization
+    readDipswitch();
+    if(!dipswitch[0])
+        mode = race;
+    else if(!dipswitch[1])
+        mode = test;
+    else
+        mode = calib;
 
     currTime = millis();
     prevTime = currTime;
@@ -82,27 +89,35 @@ void loop() {
         currTime = millis();
     prevTime = currTime;
 
-    #if defined(TESTING)
+    switch(mode) {
+        case race:
+            // static unsigned long t0, t1;
+            // t0 = micros();
+            control();
+            // t1 = micros();
+            // Serial.println(t1-t0);
+            
+            break;
+        
+        case test:
+            testDisplay(currTime);
+            // testLightSensor();
+            // testLineSensors();
+            // testEncoders();
+            // testMotors(currTime);
 
-        // testDisplay(currTime);
-        // testLightSensor();
-        // testLineSensors();
-        // testEncoders();
-        // testMotors(currTime);
+            break;
+        
+        case calib:
+            // calibrateLineSensors();
+            // calibrateLightSensor();
+            calibrateEncoders();
 
-    #elif defined(CALIBRATING)
+            break;
+        
+        default:
+            displayPrint("Unknown mode");
 
-        // calibrateLineSensors();
-        // calibrateLightSensor();
-        // calibrateEncoders();
-
-    #else
-
-    // static unsigned long t0, t1;
-    // t0 = micros();
-        control();
-    // t1 = micros();
-    // Serial.println(t1-t0);
-
-    #endif
+            break;
+    }
 }

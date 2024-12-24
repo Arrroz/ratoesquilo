@@ -22,7 +22,6 @@ void setupMotors() {
     lMotorInput = 0;
     rMotorInput = 0;
     updateMotors();
-    // moveLR(0, 0);
 }
 
 void setMotorDir(Motor_t motor, bool front) {
@@ -58,69 +57,7 @@ void brake() {
     lMotorInput = 0;
     rMotorInput = 0;
     updateMotors();
-
-    // moveLR(-1, -1);
-    // delay(400);
-    // moveLR(0, 0);
 }
-
-// void moveL(float speed) {
-//     if(!usingMotors)
-//         return;
-
-//     if(speed < 0) {
-//         setMotorDir(false);
-//         speed *= -1;
-//     }
-//     else {
-//         setMotorDir(true);
-//     }
-
-//     if(speed > 1)
-//         speed = 1;
-
-//     speed *= MAX_PWM_OUTPUT;
-
-//     analogWrite(PINOUT_M_PWML, (int)speed);
-// }
-
-// void moveR(float speed) {
-//     if(!usingMotors)
-//         return;
-
-//     if(speed < 0) {
-//         setMotorDir(false);
-//         speed *= -1;
-//     }
-//     else {
-//         setMotorDir(true);
-//     }
-
-//     if(speed > 1)
-//         speed = 1;
-        
-//     speed *= MAX_PWM_OUTPUT;
-
-//     analogWrite(PINOUT_M_PWMR, (int)speed);
-// }
-
-// void moveLR(float leftSpeed, float rightSpeed) {
-//     if(!usingMotors)
-//         return;
-
-//     // opposite directions are not currently possible
-//     // if they are requested, set the backwards driving motor to stopped
-//     // TODO: remove this once different directions are possible
-//     if(leftSpeed*rightSpeed < 0) {
-//         if(rightSpeed < 0)
-//             rightSpeed = 0;
-//         else
-//             leftSpeed = 0;
-//     }
-
-//     moveL(leftSpeed);
-//     moveR(rightSpeed);
-// }
 
 void updateMotor(Motor_t motor) {
     if(!usingMotors)
