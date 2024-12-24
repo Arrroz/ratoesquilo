@@ -3,7 +3,7 @@
 void calibrateLineSensors() {
     static int stage = 0;
 
-    displayPrint("Calib LS");
+    display.printAll("Calib LS");
 
     if(stage == 0) {
         Serial.println("Calibrating Line Sensors...");
@@ -35,12 +35,12 @@ void calibrateLightSensor() {
     float lux = getLux();
 
     if(lux == -1) {
-        displayPrint("Error");
+        display.printAll("Error");
         Serial.println("Error");
         return;
     }
 
-    displayPrint(lux);
+    display.printAll(lux);
     Serial.println(lux);
 }
 
@@ -53,5 +53,5 @@ void calibrateEncoders() {
     countL += speedL * ENC_PULSES_PER_METER;
     countR += speedR * ENC_PULSES_PER_METER;
 
-    displayPrint(countL, "  ", countR);
+    display.printAll(countL, "  ", countR);
 }

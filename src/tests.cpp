@@ -3,13 +3,13 @@
 #define DISPLAY_TEST_TIME 4000 // in milliseconds
 void testDisplay(unsigned long time) {
     if(time % DISPLAY_TEST_TIME < DISPLAY_TEST_TIME/4)
-        displayPrint("RES");
+        display.printAll("RE");
     else if(time % DISPLAY_TEST_TIME < DISPLAY_TEST_TIME*2/4)
-        displayPrint("RESOL");
+        display.printAll("RESOL");
     else if(time % DISPLAY_TEST_TIME < DISPLAY_TEST_TIME*3/4)
-        displayPrint("RESOLVI");
+        display.printAll("RESOLVI");
     else
-        displayPrint("RESOLVIDAO");
+        display.printAll("RESOLVIDAO");
 }
 
 // WARNING: all tests beyond this point, require the display to be working properly
@@ -19,19 +19,19 @@ void testLightSensor() {
 
     switch(illuminated()) {
         case 1:
-            displayPrint("Light On\n", lux);
+            display.printAll("Light On\n", lux);
             Serial.print("Light On\t");
             Serial.println(lux);
             break;
 
         case 0:
-            displayPrint("Light off\n", lux);
+            display.printAll("Light off\n", lux);
             Serial.print("Light off\t");
             Serial.println(lux);
             break;
         
         default:
-            displayPrint("Error\n");
+            display.printAll("Error\n");
             Serial.println("Error");
             break;
     }
@@ -69,7 +69,7 @@ void testEncoders() {
     distL += speedL;
     distR += speedR;
 
-    displayPrint(distL, " ", distR);
+    display.printAll(distL, " ", distR);
     Serial.print(distL);
     Serial.print("\t");
     Serial.println(distR);
@@ -79,27 +79,27 @@ void testEncoders() {
 #define MOTOR_TEST_SPEED 0.2
 void testMotors(unsigned long time) {
     if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME/5) {
-        displayPrint("Left");
+        display.printAll("Left");
         lMotorInput = MOTOR_TEST_SPEED;
         rMotorInput = 0;
     }
     else if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME*2/5) {
-        displayPrint("Right");
+        display.printAll("Right");
         lMotorInput = 0;
         rMotorInput = MOTOR_TEST_SPEED;
     }
     else if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME*3/5) {
-        displayPrint("Forward");
+        display.printAll("Forward");
         lMotorInput = MOTOR_TEST_SPEED;
         rMotorInput = MOTOR_TEST_SPEED;
     }
     else if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME*4/5) {
-        displayPrint("Back");
+        display.printAll("Back");
         lMotorInput = -MOTOR_TEST_SPEED;
         rMotorInput = -MOTOR_TEST_SPEED;
     }
     else {
-        displayPrint("Stop");
+        display.printAll("Stop");
         lMotorInput = 0;
         rMotorInput = 0;
     }

@@ -1,23 +1,21 @@
-extern bool usingDisplay;
-
-inline void _displayPrintBuild() {}
+inline void Display::printBuild() {}
 
 template <typename P, typename... Printables>
-void _displayPrintBuild(P first, Printables... other) {
-    if(!usingDisplay)
+void Display::printBuild(P first, Printables... other) {
+    if(!enabled)
         return;
     
-    display.print(first);
-    _displayPrintBuild(other...);
+    print(first);
+    printBuild(other...);
 }
 
 template <typename... Printables>
-void displayPrint(Printables... args) {
-    if(!usingDisplay)
+void Display::printAll(Printables... args) {
+    if(!enabled)
         return;
     
-    display.clearDisplay();
-    display.setCursor(0, 10);
-    _displayPrintBuild(args...);
-    display.display();
+    clearDisplay();
+    setCursor(0, 10);
+    printBuild(args...);
+    display();
 }

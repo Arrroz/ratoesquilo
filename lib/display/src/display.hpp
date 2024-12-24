@@ -16,14 +16,21 @@
 // #define BLUE    0b0000000000011111
 // #define YELLOW  0b1111111111100000
 
-extern Adafruit_SSD1306 display;
+class Display : public Adafruit_SSD1306 {
+public:
+    Display();
+    void setup();
+    template <typename... Printables>
+    void printAll(Printables... args);
+    void displayColor(uint16_t color);
 
-void setupDisplay();
+    bool enabled;
 
-template <typename... Printables>
-void displayPrint(Printables... args);
-
-void displayColor(uint16_t color);
+private:
+    void printBuild();
+    template <typename P, typename... Printables>
+    void printBuild(P first, Printables... other);
+};
 
 #include "display.tpp"
 

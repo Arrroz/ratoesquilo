@@ -10,6 +10,8 @@
 #include "tests.hpp"
 #include "calibration.hpp"
 
+Display display;
+
 enum Mode_t {
     race, test, calib
 };
@@ -20,13 +22,13 @@ int testNum = 0, calibNum = 0;
 #define TIME_INTERVAL 0.003 // in seconds
 unsigned long currTime, prevTime;
 
-// TODO: redo line calibration routine so all routines can be cycled with buttons
 // TODO: change libraries to work with objects instead of poluting the main namespace with variables specific to this robot
 // TODO: make constructors take the appropriate pins for initialization without including connections.hpp
 // TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
 // TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
 // TODO: test line sensors with a different number of sensors
 // TODO: test light sensor (currently not working) and it's calibration routine
+// TODO: check display scrolling functions
 
 #define BASE_SPEED 0.4
 #define KP 5
@@ -42,7 +44,7 @@ void control() {
 
     if(horizontalLine() || noLine()) {
         brake();
-        displayPrint("Stop");
+        display.printAll("Stop");
         while(true);
     }
 
@@ -56,9 +58,9 @@ void control() {
 
 void setup() {
     // Hardware setup
-    setupDisplay();
+    display.setup();
 
-    displayPrint("Setting up");
+    display.printAll("Setting up");
 
     Serial.begin(9600);
     while(!Serial);
@@ -83,7 +85,7 @@ void setup() {
     currTime = millis();
     prevTime = currTime;
 
-    displayPrint("Ready");
+    display.printAll("Ready");
 }
 
 void loop() {
@@ -171,7 +173,7 @@ void loop() {
         break;
     
     default:
-        displayPrint("Unknown mode");
+        display.printAll("Unknown mode");
         break;
     }
 }

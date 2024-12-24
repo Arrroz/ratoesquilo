@@ -2,22 +2,21 @@
 
 #define I2C_DISPLAY_ADDR 0x3C // 0x3D: alternative address for other displays
 
-bool usingDisplay = true;
+Display::Display() : Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT) {}
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-
-void setupDisplay() {
-    if(!display.begin(SSD1306_SWITCHCAPVCC, I2C_DISPLAY_ADDR)) {
-        usingDisplay = false;
+void Display::setup() {
+    if(!begin(SSD1306_SWITCHCAPVCC, I2C_DISPLAY_ADDR)) {
+        enabled = false;
         return;
     }
+    enabled = true;
 
-    display.setTextSize(2);
-    display.setTextColor(WHITE);
+    setTextSize(2);
+    setTextColor(WHITE);
 }
 
-void displayColor(uint16_t color) {
-    display.clearDisplay();
-    display.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, color);
-    display.display();
+void Display::displayColor(uint16_t color) {
+    clearDisplay();
+    fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, color);
+    display();
 }

@@ -6,6 +6,8 @@
 
 #define NUM_TESTS 5
 
+extern Display display;
+
 void testDisplay(unsigned long time);
 void testLightSensor();
 void testLineSensors();
