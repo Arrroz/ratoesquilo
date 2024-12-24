@@ -3,7 +3,7 @@
 #include <line_sensors.hpp>
 #include <encoders.hpp>
 
-#define NUM_CALIBS 5
+#define NUM_CALIBS 3
 
 void calibrateLineSensors();
 void calibrateLightSensor();

@@ -1,28 +1,44 @@
 #include "calibration.hpp"
 
 void calibrateLineSensors() {
-    Serial.println("Calibrating Line Sensors...");
+    static int stage = 0;
 
-    lineSensors.resetCalibration();
-    for(uint16_t i = 0; i < 400; i++)
+    displayPrint("Calib LS");
+
+    if(stage == 0) {
+        Serial.println("Calibrating Line Sensors...");
+        lineSensors.resetCalibration();
+    }
+
+    if(stage < 400) {
         lineSensors.calibrate();
+        stage++;
+    }
 
-    for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-        Serial.print(lineSensors.calibrationOn.minimum[i]);
-        Serial.print("\t");
+    if(stage >= 400) {
+        for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
+            Serial.print(lineSensors.calibrationOn.minimum[i]);
+            Serial.print("\t");
+        }
+        Serial.println();
+        for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
+            Serial.print(lineSensors.calibrationOn.maximum[i]);
+            Serial.print("\t");
+        }
+        Serial.println();
+
+        stage = 0;
     }
-    Serial.println();
-    for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-        Serial.print(lineSensors.calibrationOn.maximum[i]);
-        Serial.print("\t");
-    }
-    Serial.println();
-    
-    delay(200);
 }
 
 void calibrateLightSensor() {
     float lux = getLux();
+
+    if(lux == -1) {
+        displayPrint("Error");
+        Serial.println("Error");
+        return;
+    }
 
     displayPrint(lux);
     Serial.println(lux);
