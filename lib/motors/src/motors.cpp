@@ -2,97 +2,50 @@
 
 #define MAX_PWM_OUTPUT 253 // 254 or 255 causes issues with the motors' driver
 
-enum Motor_t {
-    left, right
-};
+Motor::Motor(uint8_t pwmPin, uint8_t fDirPin, uint8_t bDirPin) : pwmPin(pwmPin), fDirPin(fDirPin), bDirPin(bDirPin) {
+    pinMode(pwmPin, OUTPUT);
+    pinMode(fDirPin, OUTPUT);
+    pinMode(bDirPin, OUTPUT);
 
-bool usingMotors = true;
+    input = 0;
+    update();
 
-float lMotorInput, rMotorInput;
-
-void setupMotors() {
-    pinMode(PINOUT_ML_PWM, OUTPUT);
-    pinMode(PINOUT_MR_PWM, OUTPUT);
-
-    pinMode(PINOUT_ML_DIRF, OUTPUT);
-    pinMode(PINOUT_ML_DIRB, OUTPUT);
-    pinMode(PINOUT_MR_DIRF, OUTPUT);
-    pinMode(PINOUT_MR_DIRB, OUTPUT);
-
-    lMotorInput = 0;
-    rMotorInput = 0;
-    updateMotors();
+    enabled = true;
 }
 
-void setMotorDir(Motor_t motor, bool front) {
-    if(motor == Motor_t::left) {
-        if(front) {
-            digitalWrite(PINOUT_ML_DIRB, 0);
-            digitalWrite(PINOUT_ML_DIRF, 1);
-        }
-        else {
-            digitalWrite(PINOUT_ML_DIRB, 1);
-            digitalWrite(PINOUT_ML_DIRF, 0);
-        }
+void Motor::setDir() {
+    if(!enabled)
+        return;
+    
+    if(input > 0) {
+        digitalWrite(bDirPin, 0);
+        digitalWrite(fDirPin, 1);
     }
     else {
-        if(front) {
-            digitalWrite(PINOUT_MR_DIRB, 0);
-            digitalWrite(PINOUT_MR_DIRF, 1);
-        }
-        else {
-            digitalWrite(PINOUT_MR_DIRB, 1);
-            digitalWrite(PINOUT_MR_DIRF, 0);
-        }
+        digitalWrite(bDirPin, 1);
+        digitalWrite(fDirPin, 0);
     }
 }
 
-void brake() {
-    lMotorInput = -1;
-    rMotorInput = -1;
-    updateMotors();
-
-    delay(400);
-
-    lMotorInput = 0;
-    rMotorInput = 0;
-    updateMotors();
-}
-
-void updateMotor(Motor_t motor) {
-    if(!usingMotors)
+void Motor::update() {
+    if(!enabled)
         return;
 
-    float speed;
-    if(motor == Motor_t::left)
-        speed = lMotorInput;
-    else if(motor == Motor_t::right)
-        speed = rMotorInput;
+    // Set the direction pins
+    setDir();
 
-
-    setMotorDir(motor, (speed > 0));
-    
-    // get the absolute value of the speed
+    // Get the absolute value of the speed
+    float speed = input;
     if(speed < 0)
         speed *= -1;
 
-    // clip the speed
+    // Clip the speed
     if(speed > 1)
         speed = 1;
-    
-    // scale the speed
+
+    // Scale the speed
     speed *= MAX_PWM_OUTPUT;
 
-    if(motor == Motor_t::left)
-        analogWrite(PINOUT_ML_PWM, (int)speed);
-    else if(motor == Motor_t::right)
-        analogWrite(PINOUT_MR_PWM, (int)speed);
-}
-
-void updateMotors() {
-    if(!usingMotors)
-        return;
-
-    updateMotor(Motor_t::left);
-    updateMotor(Motor_t::right);    
+    // Output the speed
+    analogWrite(pwmPin, (int)speed);
 }

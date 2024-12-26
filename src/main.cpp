@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include <connections.hpp>
+
 #include <switch.hpp>
 #include <dipswitch.hpp>
 #include <button.hpp>
@@ -22,6 +24,9 @@ LineSensors lineSensors;
 Encoder encoderL(PINOUT_ENC_LA, PINOUT_ENC_LB);
 Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
 
+Motor motorL(PINOUT_ML_PWM, PINOUT_ML_DIRF, PINOUT_ML_DIRB);
+Motor motorR(PINOUT_MR_PWM, PINOUT_MR_DIRF, PINOUT_MR_DIRB);
+
 enum Mode_t {
     race, test, calib
 };
@@ -32,8 +37,7 @@ int testNum = 0, calibNum = 0;
 #define TIME_INTERVAL 0.003 // in seconds
 unsigned long currTime, prevTime;
 
-// TODO: change libraries to work with objects instead of poluting the main namespace with variables specific to this robot
-// TODO: make constructors take the appropriate pins for initialization without including connections.hpp
+// TODO: remove extern refs to objects in the tests and calib routines; pass objects instead; removes the responsibility from main to have to create objects that won't be tested
 // TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
 // TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
 // TODO: test line sensors with a different number of sensors
@@ -45,6 +49,20 @@ unsigned long currTime, prevTime;
 #define BASE_SPEED 0.4
 #define KP 5
 #define KD 1
+
+void brake() {
+    motorL.input = -1;
+    motorR.input = -1;
+    motorL.update();
+    motorR.update();
+
+    delay(400);
+
+    motorL.input = 0;
+    motorR.input = 0;
+    motorL.update();
+    motorR.update();
+}
 
 void control() {
     static float prevLinePos = 0;
@@ -62,10 +80,11 @@ void control() {
 
     speedDiff = KP*lineSensors.linePos + KD*(lineSensors.linePos-prevLinePos)/TIME_INTERVAL;
 
-    lMotorInput = BASE_SPEED - speedDiff;
-    rMotorInput = BASE_SPEED + speedDiff;
+    motorL.input = BASE_SPEED - speedDiff;
+    motorR.input = BASE_SPEED + speedDiff;
 
-    updateMotors();
+    motorL.update();
+    motorR.update();
 }
 
 void setup() {
@@ -79,7 +98,6 @@ void setup() {
 
     setupLightSensor();
     lineSensors.setup(PINOUT_LS_SENSORS, PINOUT_LS_EMMITER_ODD, PINOUT_LS_EMMITER_EVEN);
-    setupMotors();
     
     delay(500);
 
@@ -146,9 +164,10 @@ void loop() {
 
         // Disable motors if their test is not running
         if(testNum != 4) {
-            lMotorInput = 0;
-            rMotorInput = 0;
-            updateMotors();
+            motorL.input = 0;
+            motorR.input = 0;
+            motorL.update();
+            motorR.update();
         }
 
         break;

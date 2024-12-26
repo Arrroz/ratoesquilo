@@ -2,12 +2,19 @@
 #define MOTOR_H_
 
 #include <Arduino.h>
-#include <connections.hpp>
 
-extern float lMotorInput, rMotorInput;
+class Motor {
+public:
+    Motor(uint8_t pwmPin, uint8_t fDirPin, uint8_t bDirPin);
+    void setDir();
+    void update();
 
-void setupMotors();
-void brake();
-void updateMotors();
+    float input;
+
+    bool enabled;
+
+private:
+    uint8_t pwmPin, fDirPin, bDirPin;
+};
 
 #endif

@@ -9,6 +9,7 @@
 extern Display display;
 extern LineSensors lineSensors;
 extern Encoder encoderL, encoderR;
+extern Motor motorL, motorR;
 
 void testDisplay(unsigned long time);
 void testLightSensor();

@@ -82,29 +82,30 @@ void testEncoders() {
 void testMotors(unsigned long time) {
     if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME/5) {
         display.printAll("Left");
-        lMotorInput = MOTOR_TEST_SPEED;
-        rMotorInput = 0;
+        motorL.input = MOTOR_TEST_SPEED;
+        motorR.input = 0;
     }
     else if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME*2/5) {
         display.printAll("Right");
-        lMotorInput = 0;
-        rMotorInput = MOTOR_TEST_SPEED;
+        motorL.input = 0;
+        motorR.input = MOTOR_TEST_SPEED;
     }
     else if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME*3/5) {
         display.printAll("Forward");
-        lMotorInput = MOTOR_TEST_SPEED;
-        rMotorInput = MOTOR_TEST_SPEED;
+        motorL.input = MOTOR_TEST_SPEED;
+        motorR.input = MOTOR_TEST_SPEED;
     }
     else if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME*4/5) {
         display.printAll("Back");
-        lMotorInput = -MOTOR_TEST_SPEED;
-        rMotorInput = -MOTOR_TEST_SPEED;
+        motorL.input = -MOTOR_TEST_SPEED;
+        motorR.input = -MOTOR_TEST_SPEED;
     }
     else {
         display.printAll("Stop");
-        lMotorInput = 0;
-        rMotorInput = 0;
+        motorL.input = 0;
+        motorR.input = 0;
     }
     
-    updateMotors();
+    motorL.update();
+    motorR.update();
 }
