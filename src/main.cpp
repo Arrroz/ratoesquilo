@@ -1,6 +1,9 @@
 #include <Arduino.h>
 
-#include <interface.hpp>
+// #include <interface.hpp>
+#include <switch.hpp>
+#include <dipswitch.hpp>
+#include <button.hpp>
 #include <display.hpp>
 #include <light_sensor.hpp>
 #include <line_sensors.hpp>
@@ -10,7 +13,12 @@
 #include "tests.hpp"
 #include "calibration.hpp"
 
+Switch debugSw(PINOUT_DEBUG_SW);
+Dipswitch dipswitch(PINOUT_DIPSWITCH);
+Button btn1(PINOUT_BTN1, true), btn2(PINOUT_BTN2, true);
+
 Display display;
+
 Encoder encoderL(PINOUT_ENC_LA, PINOUT_ENC_LB);
 Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
 
@@ -31,6 +39,7 @@ unsigned long currTime, prevTime;
 // TODO: test line sensors with a different number of sensors
 // TODO: test light sensor (currently not working) and it's calibration routine
 // TODO: check display scrolling functions
+// TODO: config files for spread out constants?
 
 #define BASE_SPEED 0.4
 #define KP 5
@@ -67,16 +76,14 @@ void setup() {
     Serial.begin(9600);
     while(!Serial);
 
-    setupInterface();
+    // setupInterface();
     setupLightSensor();
     setupLineSensors();
-    // setupEncoders();
     setupMotors();
     
     delay(500);
 
     // Program initialization
-    readDipswitch();
     if(!dipswitch[0])
         mode = race;
     else if(!dipswitch[1])
@@ -99,17 +106,17 @@ void loop() {
     case race:
         // static unsigned long t0, t1;
         // t0 = micros();
-        control();
+        // control();
         // t1 = micros();
         // Serial.println(t1-t0);
+        display.printAll(debugSw.read());
         
         break;
     
     case test:
         // Cycle between tests with button presses
-        readButtons();
-        if(btnTriggered[0]) testNum++;
-        if(btnTriggered[1]) testNum--;
+        if(btn1.read()) testNum++;
+        if(btn2.read()) testNum--;
 
         switch (testNum) {
         case 0:
@@ -149,9 +156,8 @@ void loop() {
     
     case calib:
         // Cycle between calibration routines with button presses
-        readButtons();
-        if(btnTriggered[0]) calibNum++;
-        if(btnTriggered[1]) calibNum--;
+        if(btn1.read()) calibNum++;
+        if(btn2.read()) calibNum--;
 
         switch(calibNum) {
         case 0:
