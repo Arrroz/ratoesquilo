@@ -1,102 +1,75 @@
 #include "line_sensors.hpp"
 
-#define LS_PITCH 0.004 // in meters
-
 // #define LS_CALIB_MIN 76
 // #define LS_CALIB_MAX 380
 #define LS_CALIB_MIN 33
 #define LS_CALIB_MAX 800
 
+#define LS_PITCH 0.004 // in meters
+
+#define LS_THRESHOLD 200
 #define LS_NOISE_THRESHOLD 50
 
-#define LS_HORIZONTAL_LINE_DETECTIONS_REQ 7
+#define LS_HORIZONTAL_LINE_DETECTIONS_REQ 8
 
-bool usingLineSensors = true;
+LineSensors::LineSensors() : QTRSensors() {}
 
-QTRSensors lineSensors;
-uint16_t lineSensorValues[LINE_SENSOR_COUNT];
-float linePos;
-uint8_t lineSensorDetections;
+void LineSensors::setup(const uint8_t sensorPins[LINE_SENSOR_COUNT], const uint8_t oddEmmiterPin, const uint8_t evenEmmiterPin) {   
+    setTypeAnalog();
 
-void setupLineSensors() {   
-    lineSensors.setTypeAnalog();
+    setSensorPins(sensorPins, LINE_SENSOR_COUNT);
 
-    // Find which sensors to use based on the chosen LINE_SENSOR_COUNT and set them up
-    uint8_t lineSensorsTotal = sizeof(PINOUT_LS_SENSORS) / sizeof(PINOUT_LS_SENSORS[0]);
-    uint8_t lineSensorsPinout[LINE_SENSOR_COUNT] = {};
-    for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-        uint8_t j = i + (lineSensorsTotal - LINE_SENSOR_COUNT) / 2;
-        lineSensorsPinout[i] = PINOUT_LS_SENSORS[j];
-    }
-    lineSensors.setSensorPins(lineSensorsPinout, LINE_SENSOR_COUNT);
+    setEmitterPins(oddEmmiterPin, evenEmmiterPin);
+    emittersOn();
 
-    lineSensors.setEmitterPins(PINOUT_LS_EMMITER_ODD, PINOUT_LS_EMMITER_EVEN);
-    lineSensors.emittersOn();
+    setSamplesPerSensor(1);
 
-    lineSensors.setSamplesPerSensor(1);
+    enabled = true;
 
     delay(500);
 }
 
-void normalizeLineSensorValues() {
-    for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-        int16_t value = 0;
+void LineSensors::update() {
+    if(!enabled)
+        return;
+    
+    // Get readings
+    read(values, QTRReadMode::Manual);
 
-        value = (((int32_t)lineSensorValues[i]) - LS_CALIB_MIN) * 1000 / (LS_CALIB_MAX-LS_CALIB_MIN);
-
-        if (value < 0)
-            value = 0;
-        else if (value > 1000)
-            value = 1000;
-
-        lineSensorValues[i] = value;
-    }
-}
-
-void updateLinePos() {
     uint32_t avg = 0;
     uint16_t sum = 0;
-    lineSensorDetections = 0;
-
+    uint8_t detectionCount = 0;
     for (uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-        uint16_t value = lineSensorValues[i];
+        // Normalize each sensor reading
+        values[i] = (((int32_t)values[i]) - LS_CALIB_MIN) * 1000 / (LS_CALIB_MAX-LS_CALIB_MIN);
+        if (values[i] < 0)
+            values[i] = 0;
+        else if (values[i] > 1000)
+            values[i] = 1000;
 
-        if (value > LS_THRESHOLD)
-            lineSensorDetections++;
-
-        // only consider values above a noise threshold
-        if (value < LS_NOISE_THRESHOLD)
+        // Clean out noisy measurements
+        if (values[i] < LS_NOISE_THRESHOLD)
             continue;
 
-        avg += (uint32_t)value * (i * 1000);
-        sum += value;
+        // Find how many sensors detected the line
+        if (values[i] > LS_THRESHOLD)
+            detectionCount++;
+
+        // Calculate contribution to line position
+        avg += (uint32_t)values[i] * (i * 1000);
+        sum += values[i];
     }
 
+    // Update relevant variables
+    horizontalLine = (detectionCount >= LS_HORIZONTAL_LINE_DETECTIONS_REQ);
+    noLine = (detectionCount == 0);
+
+    // Get line position
     if(sum == 0) {
         linePos = 0;
         return;
     }
-
     linePos = avg / sum / 1000;
     linePos -= (LINE_SENSOR_COUNT-1)/2.0; // center
     linePos *= LS_PITCH; // scale to meters
-}
-
-void readLineSensors() {
-    if(!usingLineSensors)
-        return;
-    
-    lineSensors.read(lineSensorValues, QTRReadMode::Manual);
-
-    normalizeLineSensorValues();
-
-    updateLinePos();
-}
-
-bool horizontalLine() {
-    return (lineSensorDetections > LS_HORIZONTAL_LINE_DETECTIONS_REQ);
-}
-
-bool noLine() {
-    return (lineSensorDetections == 0);
 }

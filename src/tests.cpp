@@ -40,8 +40,9 @@ void testLightSensor() {
 #define LS_TEST_RECTANGLE_SPACING 2
 #define LS_TEST_RECTANGLE_WIDTH SCREEN_WIDTH/LINE_SENSOR_COUNT - LS_TEST_RECTANGLE_SPACING/2
 #define LS_TEST_RECTANGLE_HEIGHT SCREEN_HEIGHT/2
+#define LS_THRESHOLD 200
 void testLineSensors() {
-    readLineSensors();
+    lineSensors.update();
 
     display.clearDisplay();
     for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
@@ -49,13 +50,13 @@ void testLineSensors() {
                          LS_TEST_RECTANGLE_WIDTH, LS_TEST_RECTANGLE_HEIGHT,
                          WHITE);
         
-        if(lineSensorValues[LINE_SENSOR_COUNT-i-1] <= LS_THRESHOLD){ // flip the index to match the display with the sensor locations
+        if(lineSensors.values[LINE_SENSOR_COUNT-i-1] <= LS_THRESHOLD){ // flip the index to match the display with the sensor locations
             display.fillRect(i*(LS_TEST_RECTANGLE_WIDTH+LS_TEST_RECTANGLE_SPACING), LS_TEST_RECTANGLE_HEIGHT/2,
                              LS_TEST_RECTANGLE_WIDTH, LS_TEST_RECTANGLE_HEIGHT,
                              WHITE);
         }
         
-        Serial.print(lineSensorValues[i]);
+        Serial.print(lineSensors.values[i]);
         Serial.print('\t');
     }
     display.display();

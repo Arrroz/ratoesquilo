@@ -1,6 +1,5 @@
 #include <Arduino.h>
 
-// #include <interface.hpp>
 #include <switch.hpp>
 #include <dipswitch.hpp>
 #include <button.hpp>
@@ -19,6 +18,7 @@ Button btn1(PINOUT_BTN1, true), btn2(PINOUT_BTN2, true);
 
 Display display;
 
+LineSensors lineSensors;
 Encoder encoderL(PINOUT_ENC_LA, PINOUT_ENC_LB);
 Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
 
@@ -38,6 +38,7 @@ unsigned long currTime, prevTime;
 // TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
 // TODO: test line sensors with a different number of sensors
 // TODO: test light sensor (currently not working) and it's calibration routine
+// TODO: turn light sensor into object
 // TODO: check display scrolling functions
 // TODO: config files for spread out constants?
 
@@ -49,17 +50,17 @@ void control() {
     static float prevLinePos = 0;
     static float speedDiff;
 
-    prevLinePos = linePos;
+    prevLinePos = lineSensors.linePos;
 
-    readLineSensors();
+    lineSensors.update();
 
-    if(horizontalLine() || noLine()) {
+    if(lineSensors.horizontalLine || lineSensors.noLine) {
         brake();
         display.printAll("Stop");
         while(true);
     }
 
-    speedDiff = KP*linePos + KD*(linePos-prevLinePos)/TIME_INTERVAL;
+    speedDiff = KP*lineSensors.linePos + KD*(lineSensors.linePos-prevLinePos)/TIME_INTERVAL;
 
     lMotorInput = BASE_SPEED - speedDiff;
     rMotorInput = BASE_SPEED + speedDiff;
@@ -76,9 +77,8 @@ void setup() {
     Serial.begin(9600);
     while(!Serial);
 
-    // setupInterface();
     setupLightSensor();
-    setupLineSensors();
+    lineSensors.setup(PINOUT_LS_SENSORS, PINOUT_LS_EMMITER_ODD, PINOUT_LS_EMMITER_EVEN);
     setupMotors();
     
     delay(500);
@@ -109,7 +109,6 @@ void loop() {
         // control();
         // t1 = micros();
         // Serial.println(t1-t0);
-        display.printAll(debugSw.read());
         
         break;
     
