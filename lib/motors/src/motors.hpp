@@ -7,6 +7,7 @@ class Motor {
 public:
     Motor(uint8_t pwmPin, uint8_t fDirPin, uint8_t bDirPin);
     void setDir();
+    void stop();
     void update();
 
     float input;

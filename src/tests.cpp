@@ -102,8 +102,8 @@ void testMotors(unsigned long time) {
     }
     else {
         display.printAll("Stop");
-        motorL.input = 0;
-        motorR.input = 0;
+        motorL.stop();
+        motorR.stop();
     }
     
     motorL.update();

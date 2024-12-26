@@ -17,7 +17,11 @@ void Motor::setDir() {
     if(!enabled)
         return;
     
-    if(input > 0) {
+    if(input == 0) {
+        digitalWrite(bDirPin, 0);
+        digitalWrite(fDirPin, 0);
+    }
+    else if(input > 0) {
         digitalWrite(bDirPin, 0);
         digitalWrite(fDirPin, 1);
     }
@@ -25,6 +29,13 @@ void Motor::setDir() {
         digitalWrite(bDirPin, 1);
         digitalWrite(fDirPin, 0);
     }
+}
+
+void Motor::stop() {
+    digitalWrite(bDirPin, 0);
+    digitalWrite(fDirPin, 0);
+
+    input = 0;
 }
 
 void Motor::update() {
