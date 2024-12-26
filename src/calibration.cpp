@@ -1,28 +1,28 @@
 #include "calibration.hpp"
 
-void calibrateLineSensors() {
+void calibrateLineSensors(LineSensors *lineSensors, Display *display) {
     static int stage = 0;
 
-    display.printAll("Calib LS");
+    if(display) display->printAll("Calib LS");
 
     if(stage == 0) {
         Serial.println("Calibrating Line Sensors...");
-        lineSensors.resetCalibration();
+        lineSensors->resetCalibration();
     }
 
     if(stage < 400) {
-        lineSensors.calibrate();
+        lineSensors->calibrate();
         stage++;
     }
 
     if(stage >= 400) {
         for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-            Serial.print(lineSensors.calibrationOn.minimum[i]);
+            Serial.print(lineSensors->calibrationOn.minimum[i]);
             Serial.print("\t");
         }
         Serial.println();
         for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-            Serial.print(lineSensors.calibrationOn.maximum[i]);
+            Serial.print(lineSensors->calibrationOn.maximum[i]);
             Serial.print("\t");
         }
         Serial.println();
@@ -31,27 +31,22 @@ void calibrateLineSensors() {
     }
 }
 
-void calibrateLightSensor() {
+void calibrateLightSensor(Display *display) {
     float lux = getLux();
 
     if(lux == -1) {
-        display.printAll("Error");
+        if(display) display->printAll("Error");
         Serial.println("Error");
         return;
     }
 
-    display.printAll(lux);
+    if(display) display->printAll(lux);
     Serial.println(lux);
 }
 
-void calibrateEncoders() {
-    // static int16_t countL = 0;
-    // static int16_t countR = 0;
-
-    // updateEncoderSpeeds();
-
-    // countL += speedL * ENC_PULSES_PER_METER;
-    // countR += speedR * ENC_PULSES_PER_METER;
-
-    display.printAll(encoderL.count, "  ", encoderR.count);
+void calibrateEncoders(Encoder *encoderL, Encoder *encoderR, Display *display) {
+    if(display) display->printAll(encoderL->count, "  ", encoderR->count);
+    Serial.print(encoderL->count);
+    Serial.print("\t");
+    Serial.print(encoderR->count);
 }

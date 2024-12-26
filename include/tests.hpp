@@ -6,13 +6,8 @@
 
 #define NUM_TESTS 5
 
-extern Display display;
-extern LineSensors lineSensors;
-extern Encoder encoderL, encoderR;
-extern Motor motorL, motorR;
-
-void testDisplay(unsigned long time);
-void testLightSensor();
-void testLineSensors();
-void testEncoders();
-void testMotors(unsigned long time);
+void testDisplay(Display *display, unsigned long time);
+void testLightSensor(Display *display = NULL);
+void testLineSensors(LineSensors *lineSensors, Display *display = NULL);
+void testEncoders(Encoder *encoderL, Encoder *encoderR, Display *display = NULL);
+void testMotors(Motor *motorL, Motor *motorR, unsigned long time, Display *display = NULL);

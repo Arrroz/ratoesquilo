@@ -37,7 +37,6 @@ int testNum = 0, calibNum = 0;
 #define TIME_INTERVAL 0.003 // in seconds
 unsigned long currTime, prevTime;
 
-// TODO: remove extern refs to objects in the tests and calib routines; pass objects instead; removes the responsibility from main to have to create objects that won't be tested
 // TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
 // TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
 // TODO: test line sensors with a different number of sensors
@@ -137,23 +136,23 @@ void loop() {
 
         switch (testNum) {
         case 0:
-            testDisplay(currTime);
+            testDisplay(&display, currTime);
             break;
         
         case 1:
-            testLightSensor();
+            testLightSensor(&display);
             break;
         
         case 2:
-            testLineSensors();
+            testLineSensors(&lineSensors, &display);
             break;
         
         case 3:
-            testEncoders();
+            testEncoders(&encoderL, &encoderR, &display);
             break;
 
         case 4:
-            testMotors(currTime);
+            testMotors(&motorL, &motorR, currTime, &display);
             break;
         
         default:
@@ -179,15 +178,15 @@ void loop() {
 
         switch(calibNum) {
         case 0:
-            calibrateLineSensors();
+            calibrateLineSensors(&lineSensors, &display);
             break;
         
         case 1:
-            calibrateLightSensor();
+            calibrateLightSensor(&display);
             break;
         
         case 2:
-            calibrateEncoders();
+            calibrateEncoders(&encoderL, &encoderR, &display);
             break;
         
         default:

@@ -5,10 +5,6 @@
 
 #define NUM_CALIBS 3
 
-extern Display display;
-extern LineSensors lineSensors;
-extern Encoder encoderL, encoderR;
-
-void calibrateLineSensors();
-void calibrateLightSensor();
-void calibrateEncoders();
+void calibrateLineSensors(LineSensors *lineSensors, Display *display = NULL);
+void calibrateLightSensor(Display *display = NULL);
+void calibrateEncoders(Encoder *encoderL, Encoder *encoderR, Display *display = NULL);
