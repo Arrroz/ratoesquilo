@@ -5,8 +5,8 @@
 
 #ifdef MEGA2560PRO
 
-#define PINOUT_LS_EMMITER_EVEN 67
-#define PINOUT_LS_EMMITER_ODD 68
+#define PINOUT_LS_EMITTER_EVEN 67
+#define PINOUT_LS_EMITTER_ODD 68
 #define PINOUT_LS_SENSORS (const uint8_t[]){66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54}
 
 #define PINOUT_ML_PWM 7
@@ -30,8 +30,8 @@
 
 #ifdef ESP32
 
-#define PINOUT_LS_EMMITER_ODD 23
-#define PINOUT_LS_EMMITER_EVEN 13
+#define PINOUT_LS_EMITTER_ODD 23
+#define PINOUT_LS_EMITTER_EVEN 13
 #define PINOUT_LS_SENSORS (const uint8_t[]){25, 26, 27, 14, 19, 18, 5, 17, 16, 4, 0, 2, 15}
 
 #define PINOUT_M_PWML 32

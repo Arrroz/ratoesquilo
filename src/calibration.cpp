@@ -3,26 +3,44 @@
 void calibrateLineSensors(LineSensors *lineSensors, Display *display) {
     static int stage = 0;
 
+    static uint16_t mins[LINE_SENSOR_COUNT], maxs[LINE_SENSOR_COUNT];
+
     if(display) display->printAll("Calib LS");
 
+    // Reset calibration variables
     if(stage == 0) {
         Serial.println("Calibrating Line Sensors...");
-        lineSensors->resetCalibration();
+
+        for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
+            mins[i] = -1; // maximum possible value for an unsigned int
+            maxs[i] = 0;
+        }
     }
 
+    // Each stage update the minimum and maximum if they were found
     if(stage < 400) {
-        lineSensors->calibrate();
+        lineSensors->read();
+
+        for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
+            if(lineSensors->values[i] < mins[i])
+                mins[i] = lineSensors->values[i];
+            if(lineSensors->values[i] > maxs[i])
+                maxs[i] = lineSensors->values[i];
+        }
+
         stage++;
     }
 
+    // Print the results
     if(stage >= 400) {
         for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-            Serial.print(lineSensors->calibrationOn.minimum[i]);
+            Serial.print(mins[i]);
             Serial.print("\t");
         }
         Serial.println();
+        
         for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-            Serial.print(lineSensors->calibrationOn.maximum[i]);
+            Serial.print(maxs[i]);
             Serial.print("\t");
         }
         Serial.println();

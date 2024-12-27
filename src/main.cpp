@@ -39,7 +39,6 @@ unsigned long currTime, prevTime;
 
 // TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
 // TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
-// TODO: test line sensors with a different number of sensors
 // TODO: test light sensor (currently not working) and it's calibration routine
 // TODO: turn light sensor into object
 // TODO: check display scrolling functions
@@ -71,7 +70,7 @@ void control() {
 
     lineSensors.update();
 
-    if(lineSensors.horizontalLine || lineSensors.noLine) {
+    if(lineSensors.fullLine || lineSensors.noLine) {
         brake();
         display.printAll("Stop");
         while(true);
@@ -96,7 +95,7 @@ void setup() {
     while(!Serial);
 
     setupLightSensor();
-    lineSensors.setup(PINOUT_LS_SENSORS, PINOUT_LS_EMMITER_ODD, PINOUT_LS_EMMITER_EVEN);
+    lineSensors.setup(PINOUT_LS_SENSORS, PINOUT_LS_EMITTER_ODD, PINOUT_LS_EMITTER_EVEN);
     
     delay(500);
 
@@ -121,11 +120,12 @@ void loop() {
 
     switch(mode) {
     case race:
-        // static unsigned long t0, t1;
-        // t0 = micros();
+        static unsigned long t0, t1;
+        t0 = micros();
         // control();
-        // t1 = micros();
-        // Serial.println(t1-t0);
+        lineSensors.update();
+        t1 = micros();
+        Serial.println(t1-t0);
         
         break;
     

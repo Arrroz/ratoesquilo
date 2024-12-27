@@ -1,7 +1,5 @@
 #include "line_sensors.hpp"
 
-// #define LS_CALIB_MIN 76
-// #define LS_CALIB_MAX 380
 #define LS_CALIB_MIN 33
 #define LS_CALIB_MAX 800
 
@@ -10,23 +8,30 @@
 #define LS_THRESHOLD 200
 #define LS_NOISE_THRESHOLD 50
 
-#define LS_HORIZONTAL_LINE_DETECTIONS_REQ 8
+#define LS_FULL_LINE_DETECTIONS_REQ 8
 
-LineSensors::LineSensors() : QTRSensors() {}
+LineSensors::LineSensors() {}
 
-void LineSensors::setup(const uint8_t sensorPins[LINE_SENSOR_COUNT], const uint8_t oddEmmiterPin, const uint8_t evenEmmiterPin) {   
-    setTypeAnalog();
-
-    setSensorPins(sensorPins, LINE_SENSOR_COUNT);
-
-    setEmitterPins(oddEmmiterPin, evenEmmiterPin);
-    emittersOn();
-
-    setSamplesPerSensor(1);
-
+void LineSensors::setup(const uint8_t sensorPins[LINE_SENSOR_COUNT],
+                        uint8_t oddEmitterPin,
+                        uint8_t evenEmitterPin) {
+    
+    for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++)
+        this->sensorPins[i] = sensorPins[i];
+    this->oddEmitterPin = oddEmitterPin;
+    this->evenEmitterPin = evenEmitterPin;
+    
+    digitalWrite(oddEmitterPin, HIGH);
+    digitalWrite(evenEmitterPin, HIGH);
+    
     enabled = true;
 
     delay(500);
+}
+
+void LineSensors::read() {
+    for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++)
+        values[i] = analogRead(sensorPins[i]);
 }
 
 void LineSensors::update() {
@@ -34,7 +39,7 @@ void LineSensors::update() {
         return;
     
     // Get readings
-    read(values, QTRReadMode::Manual);
+    read();
 
     uint32_t avg = 0;
     uint16_t sum = 0;
@@ -61,7 +66,7 @@ void LineSensors::update() {
     }
 
     // Update relevant variables
-    horizontalLine = (detectionCount >= LS_HORIZONTAL_LINE_DETECTIONS_REQ);
+    fullLine = (detectionCount >= LS_FULL_LINE_DETECTIONS_REQ);
     noLine = (detectionCount == 0);
 
     // Get line position
