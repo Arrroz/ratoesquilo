@@ -10,12 +10,9 @@
 
 #define LS_FULL_LINE_DETECTIONS_REQ 8
 
-LineSensors::LineSensors() {}
-
-void LineSensors::setup(const uint8_t sensorPins[LINE_SENSOR_COUNT],
+LineSensors::LineSensors(const uint8_t sensorPins[LINE_SENSOR_COUNT],
                         uint8_t oddEmitterPin,
                         uint8_t evenEmitterPin) {
-    
     for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++)
         this->sensorPins[i] = sensorPins[i];
     this->oddEmitterPin = oddEmitterPin;
@@ -25,8 +22,6 @@ void LineSensors::setup(const uint8_t sensorPins[LINE_SENSOR_COUNT],
     digitalWrite(evenEmitterPin, HIGH);
     
     enabled = true;
-
-    delay(500);
 }
 
 void LineSensors::read() {

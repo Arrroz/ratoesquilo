@@ -8,8 +8,7 @@
 
 class LineSensors {
 public:
-    LineSensors();
-    void setup(const uint8_t sensorPins[LINE_SENSOR_COUNT], uint8_t oddEmitterPin, uint8_t evenEmitterPin);
+    LineSensors(const uint8_t sensorPins[LINE_SENSOR_COUNT], uint8_t oddEmitterPin, uint8_t evenEmitterPin);
     void read();
     void update();
 

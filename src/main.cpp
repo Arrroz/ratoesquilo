@@ -20,7 +20,7 @@ Button btn1(PINOUT_BTN1, true), btn2(PINOUT_BTN2, true);
 
 Display display;
 
-LineSensors lineSensors;
+LineSensors lineSensors(PINOUT_LS_SENSORS, PINOUT_LS_EMITTER_ODD, PINOUT_LS_EMITTER_EVEN);
 Encoder encoderL(PINOUT_ENC_LA, PINOUT_ENC_LB);
 Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
 
@@ -95,7 +95,6 @@ void setup() {
     while(!Serial);
 
     setupLightSensor();
-    lineSensors.setup(PINOUT_LS_SENSORS, PINOUT_LS_EMITTER_ODD, PINOUT_LS_EMITTER_EVEN);
     
     delay(500);
 
