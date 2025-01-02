@@ -1,5 +1,18 @@
 #include "pid.hpp"
 
+PID_t::PID_t() {
+    kp = 0;
+    ki = 0;
+    kd = 0;
+    kf = 0;
+
+    error = 0;
+    iError = 0;
+    dError = 0;
+    prevError = 0;
+    output = 0;
+}
+
 PID_t::PID_t(float kp, float ki, float kd, float kf): kp(kp), ki(ki), kd(kd), kf(kf) {
     error = 0;
     iError = 0;

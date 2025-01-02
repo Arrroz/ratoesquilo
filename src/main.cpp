@@ -14,6 +14,8 @@
 #include "tests.hpp"
 #include "calibration.hpp"
 
+#include "wheel.hpp"
+
 Switch debugSw(PINOUT_DEBUG_SW);
 Dipswitch dipswitch(PINOUT_DIPSWITCH);
 Button btn1(PINOUT_BTN1, true), btn2(PINOUT_BTN2, true);
@@ -26,6 +28,9 @@ Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
 
 Motor motorL(PINOUT_ML_PWM, PINOUT_ML_DIRF, PINOUT_ML_DIRB);
 Motor motorR(PINOUT_MR_PWM, PINOUT_MR_DIRF, PINOUT_MR_DIRB);
+
+Wheel wheelL(&motorL, &encoderL);
+Wheel wheelR(&motorR, &encoderR);
 
 enum Mode_t {
     race, test, calib
@@ -62,7 +67,7 @@ void brake() {
     motorR.update();
 }
 
-void control() {
+void motorControl() {
     static float prevLinePos = 0;
     static float speedDiff;
 
@@ -83,6 +88,29 @@ void control() {
 
     motorL.update();
     motorR.update();
+}
+
+void wheelControl() {
+    static float prevLinePos = 0;
+    static float speedDiff;
+
+    prevLinePos = lineSensors.linePos;
+
+    lineSensors.update();
+
+    if(lineSensors.fullLine || lineSensors.noLine) {
+        brake();
+        display.printAll("Stop");
+        while(true);
+    }
+
+    speedDiff = KP*lineSensors.linePos + KD*(lineSensors.linePos-prevLinePos)/TIME_INTERVAL;
+
+    wheelL.refSpeed = BASE_SPEED - speedDiff;
+    wheelR.refSpeed = BASE_SPEED + speedDiff;
+
+    wheelL.update(TIME_INTERVAL);
+    wheelR.update(TIME_INTERVAL);
 }
 
 void setup() {
@@ -121,7 +149,8 @@ void loop() {
     case race:
         static unsigned long t0, t1;
         t0 = micros();
-        // control();
+        // motorControl();
+        // wheelControl();
         lineSensors.update();
         t1 = micros();
         Serial.println(t1-t0);
