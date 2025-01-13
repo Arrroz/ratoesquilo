@@ -1,17 +1,23 @@
 #include "tests.hpp"
 
-#define DISPLAY_TEST_TIME 3000 // in milliseconds
-void testDisplay(Display *display, unsigned long time) {
-    if(time % DISPLAY_TEST_TIME < DISPLAY_TEST_TIME/5)
+#define DISPLAY_TEST_STAGE_SIZE 10
+void testDisplay(Display *display) {
+    static uint16_t stage = 0;
+
+    if(stage < DISPLAY_TEST_STAGE_SIZE)
         display->print("\nA");
-    else if(time % DISPLAY_TEST_TIME < DISPLAY_TEST_TIME*2/5)
+    else if(stage < DISPLAY_TEST_STAGE_SIZE*2)
         display->print("\nARE");
-    else if(time % DISPLAY_TEST_TIME < DISPLAY_TEST_TIME*3/5)
+    else if(stage < DISPLAY_TEST_STAGE_SIZE*3)
         display->print("\nARESOL");
-    else if(time % DISPLAY_TEST_TIME < DISPLAY_TEST_TIME*4/5)
+    else if(stage < DISPLAY_TEST_STAGE_SIZE*4)
         display->print("\nARESOLVI");
-    else
+    else if(stage < DISPLAY_TEST_STAGE_SIZE*5)
         display->print("\nARESOLVIDAO");
+    else
+        stage = 0;
+    
+    stage++;
 }
 
 void testLightSensor(Display *display) {
@@ -38,8 +44,8 @@ void testLightSensor(Display *display) {
 }
 
 #define LS_TEST_RECTANGLE_SPACING 2
-#define LS_TEST_RECTANGLE_WIDTH SCREEN_WIDTH/LINE_SENSOR_COUNT - LS_TEST_RECTANGLE_SPACING/2
-#define LS_TEST_RECTANGLE_HEIGHT SCREEN_HEIGHT/2
+#define LS_TEST_RECTANGLE_WIDTH display->getWidth()/lineSensors->sensorCount - LS_TEST_RECTANGLE_SPACING
+#define LS_TEST_RECTANGLE_HEIGHT display->getHeight()/2
 #define LS_THRESHOLD 200
 void testLineSensors(LineSensors *lineSensors, Display *display) {
     lineSensors->update();
@@ -48,22 +54,22 @@ void testLineSensors(LineSensors *lineSensors, Display *display) {
         display->firstPage();
         do {
             display->drawStr(0, 20, "Line Sensors");
-            for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-                if(lineSensors->values[LINE_SENSOR_COUNT-i-1] <= LS_THRESHOLD){ // flip the index to match the display with the sensor locations
-                    display->drawRBox(i*(LS_TEST_RECTANGLE_WIDTH+LS_TEST_RECTANGLE_SPACING), SCREEN_HEIGHT/2,
+            for(uint8_t i = 0; i < lineSensors->sensorCount; i++) {
+                if(lineSensors->values[lineSensors->sensorCount-i-1] <= LS_THRESHOLD){ // flip the index to match the display with the sensor locations
+                    display->drawRBox(i*(LS_TEST_RECTANGLE_WIDTH+LS_TEST_RECTANGLE_SPACING), display->getHeight()/2,
                                       LS_TEST_RECTANGLE_WIDTH, LS_TEST_RECTANGLE_HEIGHT,
-                                      4);
+                                      3);
                 }
                 else {
-                    display->drawRFrame(i*(LS_TEST_RECTANGLE_WIDTH+LS_TEST_RECTANGLE_SPACING), SCREEN_HEIGHT/2,
+                    display->drawRFrame(i*(LS_TEST_RECTANGLE_WIDTH+LS_TEST_RECTANGLE_SPACING), display->getHeight()/2,
                                         LS_TEST_RECTANGLE_WIDTH, LS_TEST_RECTANGLE_HEIGHT,
-                                        4);
+                                        3);
                 }
             }
         } while(display->nextPage());
     }
 
-    for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
+    for(uint8_t i = 0; i < lineSensors->sensorCount; i++) {
         Serial.print(lineSensors->values[i]);
         Serial.print('\t');
     }
@@ -84,40 +90,46 @@ void testEncoders(Encoder *encoderL, Encoder *encoderR, Display *display) {
     Serial.println(distR);
 }
 
-#define MOTORS_TEST_TIME 5000 // in milliseconds
+#define MOTORS_TEST_STAGE_SIZE 20
 #define MOTOR_TEST_SPEED 0.2
-void testMotors(Motor *motorL, Motor *motorR, unsigned long time, Display *display) {
-    if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME/5) {
+void testMotors(Motor *motorL, Motor *motorR, Display *display) {
+    static uint16_t stage = 0;
+
+    if(stage < MOTORS_TEST_STAGE_SIZE) {
         if(display) display->print("Motors\nLeft");
         Serial.println("Left");
         motorL->input = MOTOR_TEST_SPEED;
         motorR->input = 0;
     }
-    else if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME*2/5) {
+    else if(stage < MOTORS_TEST_STAGE_SIZE*2) {
         if(display) display->print("Motors\nRight");
         Serial.println("Right");
         motorL->input = 0;
         motorR->input = MOTOR_TEST_SPEED;
     }
-    else if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME*3/5) {
+    else if(stage < MOTORS_TEST_STAGE_SIZE*3) {
         if(display) display->print("Motors\nForward");
         Serial.println("Forward");
         motorL->input = MOTOR_TEST_SPEED;
         motorR->input = MOTOR_TEST_SPEED;
     }
-    else if(time % MOTORS_TEST_TIME < MOTORS_TEST_TIME*4/5) {
+    else if(stage < MOTORS_TEST_STAGE_SIZE*4) {
         if(display) display->print("Motors\nBack");
         Serial.println("Back");
         motorL->input = -MOTOR_TEST_SPEED;
         motorR->input = -MOTOR_TEST_SPEED;
     }
-    else {
+    else if(stage < MOTORS_TEST_STAGE_SIZE*5) {
         if(display) display->print("Motors\nStop");
         Serial.println("Stop");
         motorL->stop();
         motorR->stop();
     }
+    else
+        stage = 0;
     
     motorL->update();
     motorR->update();
+
+    stage++;
 }

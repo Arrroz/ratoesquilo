@@ -18,10 +18,8 @@ void Display::printBuild(const char *first, Printables... other) {
     while(first[i] != '\0') {
         U8G2_SSD1306_128X64_NONAME_F_HW_I2C::print(first[i]);
 
-        if(first[i] == '\n') {
-            cursor += 20;
-            setCursor(0, cursor);
-        }
+        if(first[i] == '\n')
+            setCursor(0, getCursorY()+20);
 
         i++;
     }
@@ -34,11 +32,9 @@ void Display::print(Printables... args) {
     if(!enabled)
         return;
     
-    cursor = 20;
-    
     firstPage();
     do {
-        setCursor(0, cursor);
+        setCursor(0, 20);
         printBuild(args...);
     } while(nextPage());
 }

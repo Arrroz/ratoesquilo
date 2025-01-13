@@ -10,13 +10,14 @@
 
 #define LS_FULL_LINE_DETECTIONS_REQ 8
 
-LineSensors::LineSensors(const uint8_t sensorPins[LINE_SENSOR_COUNT],
-                        uint8_t oddEmitterPin,
-                        uint8_t evenEmitterPin) {
-    for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++)
+LineSensors::LineSensors(uint8_t sensorCount, const uint8_t sensorPins[], uint8_t oddEmitterPin, uint8_t evenEmitterPin) : sensorCount(sensorCount), oddEmitterPin(oddEmitterPin), evenEmitterPin(evenEmitterPin) {
+    this->sensorPins = (uint8_t*)malloc(sensorCount * sizeof(uint8_t));
+    values = (uint16_t*)malloc(sensorCount * sizeof(uint16_t));
+    calibMins = (uint16_t*)malloc(sensorCount * sizeof(uint16_t));
+    calibMaxs = (uint16_t*)malloc(sensorCount * sizeof(uint16_t));
+    
+    for(uint8_t i = 0; i < sensorCount; i++)
         this->sensorPins[i] = sensorPins[i];
-    this->oddEmitterPin = oddEmitterPin;
-    this->evenEmitterPin = evenEmitterPin;
     
     digitalWrite(oddEmitterPin, HIGH);
     digitalWrite(evenEmitterPin, HIGH);
@@ -24,8 +25,15 @@ LineSensors::LineSensors(const uint8_t sensorPins[LINE_SENSOR_COUNT],
     enabled = true;
 }
 
+LineSensors::~LineSensors() {
+    free(sensorPins);
+    free(values);
+    free(calibMins);
+    free(calibMaxs);
+}
+
 void LineSensors::read() {
-    for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++)
+    for(uint8_t i = 0; i < sensorCount; i++)
         values[i] = analogRead(sensorPins[i]);
 }
 
@@ -39,7 +47,7 @@ void LineSensors::update() {
     uint32_t avg = 0;
     uint16_t sum = 0;
     uint8_t detectionCount = 0;
-    for (uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
+    for (uint8_t i = 0; i < sensorCount; i++) {
         // Normalize each sensor reading
         values[i] = (((int32_t)values[i]) - LS_CALIB_MIN) * 1000 / (LS_CALIB_MAX-LS_CALIB_MIN);
         if (values[i] < 0)
@@ -70,6 +78,6 @@ void LineSensors::update() {
         return;
     }
     linePos = avg / sum / 1000;
-    linePos -= (LINE_SENSOR_COUNT-1)/2.0; // center
+    linePos -= (sensorCount-1)/2.0; // center
     linePos *= LS_PITCH; // scale to meters
 }

@@ -22,7 +22,7 @@ Button btn1(PINOUT_BTN1, true), btn2(PINOUT_BTN2, true);
 
 Display display;
 
-LineSensors lineSensors(PINOUT_LS_SENSORS, PINOUT_LS_EMITTER_ODD, PINOUT_LS_EMITTER_EVEN);
+LineSensors lineSensors(sizeof(PINOUT_LS_SENSORS)/sizeof(PINOUT_LS_SENSORS[0]), PINOUT_LS_SENSORS, PINOUT_LS_EMITTER_ODD, PINOUT_LS_EMITTER_EVEN);
 Encoder encoderL(PINOUT_ENC_LA, PINOUT_ENC_LB);
 Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
 
@@ -40,11 +40,10 @@ Mode_t mode;
 int testNum = 0, calibNum = 0;
 
 #define TIME_INTERVAL 0.003 // in seconds
-unsigned long currTime, prevTime;
+float currTime, prevTime;
 
 // TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
 // TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
-// TODO: test light sensor (currently not working) and it's calibration routine
 // TODO: turn light sensor into object
 // TODO: config files for spread out constants?
 
@@ -80,7 +79,7 @@ void motorControl() {
         while(true);
     }
 
-    speedDiff = KP*lineSensors.linePos + KD*(lineSensors.linePos-prevLinePos)/TIME_INTERVAL;
+    speedDiff = KP*lineSensors.linePos + KD*(lineSensors.linePos-prevLinePos)/(currTime-prevTime);
 
     motorL.input = BASE_SPEED - speedDiff;
     motorR.input = BASE_SPEED + speedDiff;
@@ -103,13 +102,13 @@ void wheelControl() {
         while(true);
     }
 
-    speedDiff = KP*lineSensors.linePos + KD*(lineSensors.linePos-prevLinePos)/TIME_INTERVAL;
+    speedDiff = KP*lineSensors.linePos + KD*(lineSensors.linePos-prevLinePos)/(currTime-prevTime);
 
     wheelL.refSpeed = BASE_SPEED - speedDiff;
     wheelR.refSpeed = BASE_SPEED + speedDiff;
 
-    wheelL.update(TIME_INTERVAL);
-    wheelR.update(TIME_INTERVAL);
+    wheelL.update((currTime-prevTime));
+    wheelR.update((currTime-prevTime));
 }
 
 void setup() {
@@ -133,17 +132,16 @@ void setup() {
     else
         mode = calib;
 
-    currTime = millis();
-    prevTime = currTime;
+    currTime = millis()/1000.0;
 
     display.print("\nReady!");
     Serial.println("Ready!");
 }
 
 void loop() {
-    while(currTime - prevTime < TIME_INTERVAL*1000)
-        currTime = millis();
     prevTime = currTime;
+    while(currTime - prevTime < TIME_INTERVAL)
+        currTime = millis()/1000.0;
 
     switch(mode) {
     case race:
@@ -170,7 +168,7 @@ void loop() {
 
         switch (testNum) {
         case 0:
-            testDisplay(&display, currTime);
+            testDisplay(&display);
             break;
         
         case 1:
@@ -186,7 +184,7 @@ void loop() {
             break;
 
         case 4:
-            testMotors(&motorL, &motorR, currTime, &display);
+            testMotors(&motorL, &motorR, &display);
             break;
         
         default:

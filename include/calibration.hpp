@@ -1,3 +1,6 @@
+#ifndef CALIBRATION_H_
+#define CALIBRATION_H_
+
 #include <display.hpp>
 #include <light_sensor.hpp>
 #include <line_sensors.hpp>
@@ -8,3 +11,5 @@
 void calibrateLineSensors(LineSensors *lineSensors, Display *display = NULL);
 void calibrateLightSensor(Display *display = NULL);
 void calibrateEncoders(Encoder *encoderL, Encoder *encoderR, Display *display = NULL);
+
+#endif

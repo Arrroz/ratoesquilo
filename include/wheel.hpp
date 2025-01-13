@@ -1,3 +1,6 @@
+#ifndef WHEEL_H_
+#define WHEEL_H_
+
 #include <Arduino.h>
 
 #include <motors.hpp>
@@ -21,3 +24,5 @@ public:
 
     bool enabled;
 };
+
+#endif

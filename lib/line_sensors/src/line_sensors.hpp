@@ -3,24 +3,25 @@
 
 #include <Arduino.h>
 
-// TODO: find a way to not have to access this outside of the lib
-#define LINE_SENSOR_COUNT 13 // max 13
-
 class LineSensors {
 public:
-    LineSensors(const uint8_t sensorPins[LINE_SENSOR_COUNT], uint8_t oddEmitterPin, uint8_t evenEmitterPin);
+    LineSensors(uint8_t sensorCount, const uint8_t sensorPins[], uint8_t oddEmitterPin, uint8_t evenEmitterPin);
+    ~LineSensors();
     void read();
     void update();
 
-    uint16_t values[LINE_SENSOR_COUNT];
+    uint8_t sensorCount;
+    uint16_t *values;
     float linePos;
     bool fullLine;
     bool noLine;
 
+    uint16_t *calibMins, *calibMaxs;
+
     bool enabled;
 
 private:
-    uint8_t sensorPins[LINE_SENSOR_COUNT];
+    uint8_t *sensorPins;
     uint8_t oddEmitterPin;
     uint8_t evenEmitterPin;
 };

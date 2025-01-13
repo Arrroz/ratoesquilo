@@ -3,44 +3,42 @@
 void calibrateLineSensors(LineSensors *lineSensors, Display *display) {
     static int stage = 0;
 
-    static uint16_t mins[LINE_SENSOR_COUNT], maxs[LINE_SENSOR_COUNT];
-
-    if(display) display->print("Line Sensors\nCalibrating...");
+    if(display) display->print("Line Sensors\nCalibrating...\n(check serial)");
 
     // Reset calibration variables
     if(stage == 0) {
         Serial.println("Calibrating Line Sensors...");
 
-        for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-            mins[i] = -1; // maximum possible value for an unsigned int
-            maxs[i] = 0;
+        for(uint8_t i = 0; i < lineSensors->sensorCount; i++) {
+            lineSensors->calibMins[i] = -1; // maximum possible value for an unsigned int
+            lineSensors->calibMaxs[i] = 0;
         }
     }
 
     // Each stage update the minimum and maximum if they were found
-    if(stage < 400) {
+    if(stage < 100) {
         lineSensors->read();
 
-        for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-            if(lineSensors->values[i] < mins[i])
-                mins[i] = lineSensors->values[i];
-            if(lineSensors->values[i] > maxs[i])
-                maxs[i] = lineSensors->values[i];
+        for(uint8_t i = 0; i < lineSensors->sensorCount; i++) {
+            if(lineSensors->values[i] < lineSensors->calibMins[i])
+                lineSensors->calibMins[i] = lineSensors->values[i];
+            if(lineSensors->values[i] > lineSensors->calibMaxs[i])
+                lineSensors->calibMaxs[i] = lineSensors->values[i];
         }
 
         stage++;
     }
 
     // Print the results
-    if(stage >= 400) {
-        for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-            Serial.print(mins[i]);
+    else {
+        for(uint8_t i = 0; i < lineSensors->sensorCount; i++) {
+            Serial.print(lineSensors->calibMins[i]);
             Serial.print("\t");
         }
         Serial.println();
         
-        for(uint8_t i = 0; i < LINE_SENSOR_COUNT; i++) {
-            Serial.print(maxs[i]);
+        for(uint8_t i = 0; i < lineSensors->sensorCount; i++) {
+            Serial.print(lineSensors->calibMaxs[i]);
             Serial.print("\t");
         }
         Serial.println();
