@@ -12,9 +12,9 @@ public:
 
     uint8_t sensorCount;
     uint16_t *values;
-    float linePos;
-    bool fullLine;
-    bool noLine;
+    float linePos = 0;
+    bool fullLine = false;
+    bool noLine = false;
 
     uint16_t *calibMins, *calibMaxs;
 

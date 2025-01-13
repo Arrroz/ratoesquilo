@@ -15,6 +15,7 @@
 #include "calibration.hpp"
 
 #include "wheel.hpp"
+#include "control.hpp"
 
 Switch debugSw(PINOUT_DEBUG_SW);
 Dipswitch dipswitch(PINOUT_DIPSWITCH);
@@ -37,79 +38,12 @@ enum Mode_t {
     race, test, calib
 };
 Mode_t mode;
-
 int testNum = 0, calibNum = 0;
 
 #define TIME_INTERVAL 0.003 // in seconds
 float currTime, prevTime;
 
-// TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
-// TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
 // TODO: config files for spread out constants?
-
-#define BASE_SPEED 0.4
-#define KP 5
-#define KD 1
-
-void brake() {
-    motorL.input = -1;
-    motorR.input = -1;
-    motorL.update();
-    motorR.update();
-
-    delay(400);
-
-    motorL.input = 0;
-    motorR.input = 0;
-    motorL.update();
-    motorR.update();
-}
-
-void motorControl() {
-    static float prevLinePos = 0;
-    static float speedDiff;
-
-    prevLinePos = lineSensors.linePos;
-
-    lineSensors.update();
-
-    if(lineSensors.fullLine || lineSensors.noLine) {
-        brake();
-        display.print("\nStop");
-        while(true);
-    }
-
-    speedDiff = KP*lineSensors.linePos + KD*(lineSensors.linePos-prevLinePos)/(currTime-prevTime);
-
-    motorL.input = BASE_SPEED - speedDiff;
-    motorR.input = BASE_SPEED + speedDiff;
-
-    motorL.update();
-    motorR.update();
-}
-
-void wheelControl() {
-    static float prevLinePos = 0;
-    static float speedDiff;
-
-    prevLinePos = lineSensors.linePos;
-
-    lineSensors.update();
-
-    if(lineSensors.fullLine || lineSensors.noLine) {
-        brake();
-        display.print("\nStop");
-        while(true);
-    }
-
-    speedDiff = KP*lineSensors.linePos + KD*(lineSensors.linePos-prevLinePos)/(currTime-prevTime);
-
-    wheelL.refSpeed = BASE_SPEED - speedDiff;
-    wheelR.refSpeed = BASE_SPEED + speedDiff;
-
-    wheelL.update((currTime-prevTime));
-    wheelR.update((currTime-prevTime));
-}
 
 void setup() {
     // Hardware setup
@@ -144,8 +78,8 @@ void loop() {
     case race:
         static unsigned long t0, t1;
         t0 = micros();
-        // motorControl();
-        // wheelControl();
+        // motorControl(&motorL, &motorR, &lineSensors, currTime-prevTime);
+        // wheelControl(&wheelL, &wheelR, &lineSensors, currTime-prevTime);
         lineSensors.update();
         t1 = micros();
         Serial.println(t1-t0);
