@@ -5,17 +5,40 @@ void Display::printBuild(P first, Printables... other) {
     if(!enabled)
         return;
     
-    print(first);
+    U8G2_SSD1306_128X64_NONAME_F_HW_I2C::print(first);
     printBuild(other...);
 }
 
 template <typename... Printables>
-void Display::printAll(Printables... args) {
+void Display::printBuild(const char *first, Printables... other) {
+    if(!enabled)
+        return;
+
+    uint16_t i = 0;
+    while(first[i] != '\0') {
+        U8G2_SSD1306_128X64_NONAME_F_HW_I2C::print(first[i]);
+
+        if(first[i] == '\n') {
+            cursor += 20;
+            setCursor(0, cursor);
+        }
+
+        i++;
+    }
+    
+    printBuild(other...);
+}
+
+template <typename... Printables>
+void Display::print(Printables... args) {
     if(!enabled)
         return;
     
-    clearDisplay();
-    setCursor(0, 10);
-    printBuild(args...);
-    display();
+    cursor = 20;
+    
+    firstPage();
+    do {
+        setCursor(0, cursor);
+        printBuild(args...);
+    } while(nextPage());
 }

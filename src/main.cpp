@@ -46,7 +46,6 @@ unsigned long currTime, prevTime;
 // TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
 // TODO: test light sensor (currently not working) and it's calibration routine
 // TODO: turn light sensor into object
-// TODO: check display scrolling functions
 // TODO: config files for spread out constants?
 
 #define BASE_SPEED 0.4
@@ -77,7 +76,7 @@ void motorControl() {
 
     if(lineSensors.fullLine || lineSensors.noLine) {
         brake();
-        display.printAll("Stop");
+        display.print("\nStop");
         while(true);
     }
 
@@ -100,7 +99,7 @@ void wheelControl() {
 
     if(lineSensors.fullLine || lineSensors.noLine) {
         brake();
-        display.printAll("Stop");
+        display.print("\nStop");
         while(true);
     }
 
@@ -117,7 +116,7 @@ void setup() {
     // Hardware setup
     display.setup();
 
-    display.printAll("Setting up");
+    display.print("\nSetting up...");
 
     Serial.begin(9600);
     while(!Serial);
@@ -137,7 +136,8 @@ void setup() {
     currTime = millis();
     prevTime = currTime;
 
-    display.printAll("Ready");
+    display.print("\nReady!");
+    Serial.println("Ready!");
 }
 
 void loop() {
@@ -147,13 +147,19 @@ void loop() {
 
     switch(mode) {
     case race:
-        static unsigned long t0, t1;
-        t0 = micros();
-        // motorControl();
-        // wheelControl();
-        lineSensors.update();
-        t1 = micros();
-        Serial.println(t1-t0);
+        testLightSensor();
+        if(dipswitch[3])
+            display.print(getLux());
+        else
+            display.print("def ", 3, "a\nfgh");
+    
+        // static unsigned long t0, t1;
+        // t0 = micros();
+        // // motorControl();
+        // // wheelControl();
+        // lineSensors.update();
+        // t1 = micros();
+        // Serial.println(t1-t0);
         
         break;
     
@@ -226,7 +232,7 @@ void loop() {
         break;
     
     default:
-        display.printAll("Unknown mode");
+        display.print("\nUnknown mode");
         break;
     }
 }

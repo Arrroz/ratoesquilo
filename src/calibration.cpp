@@ -5,7 +5,7 @@ void calibrateLineSensors(LineSensors *lineSensors, Display *display) {
 
     static uint16_t mins[LINE_SENSOR_COUNT], maxs[LINE_SENSOR_COUNT];
 
-    if(display) display->printAll("Calib LS");
+    if(display) display->print("Line Sensors\nCalibrating...");
 
     // Reset calibration variables
     if(stage == 0) {
@@ -53,17 +53,17 @@ void calibrateLightSensor(Display *display) {
     float lux = getLux();
 
     if(lux == -1) {
-        if(display) display->printAll("Error");
+        if(display) display->print("\nError");
         Serial.println("Error");
         return;
     }
 
-    if(display) display->printAll(lux);
+    if(display) display->print("Light Sensor\n", lux);
     Serial.println(lux);
 }
 
 void calibrateEncoders(Encoder *encoderL, Encoder *encoderR, Display *display) {
-    if(display) display->printAll(encoderL->count, "  ", encoderR->count);
+    if(display) display->print("Encoders\n", encoderL->count, "     ", encoderR->count);
     Serial.print(encoderL->count);
     Serial.print("\t");
     Serial.print(encoderR->count);

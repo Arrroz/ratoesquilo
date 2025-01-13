@@ -2,26 +2,17 @@
 #define DISPLAY_H_
 
 #include <Wire.h>
-#include <Adafruit_SSD1306.h>
-#include <Adafruit_GFX.h>
+#include <U8g2lib.h>
 
 #define SCREEN_WIDTH 128 // in pixels
 #define SCREEN_HEIGHT 64 // in pixels
-#define DISPLAY_MAX_CHARS 11 // for a text size of 2
 
-// Display is monochrome ;(
-// #define RED     0b1111100000000000
-// #define GREEN   0b0000011111100000
-// #define BLUE    0b0000000000011111
-// #define YELLOW  0b1111111111100000
-
-class Display : public Adafruit_SSD1306 {
+class Display : public U8G2_SSD1306_128X64_NONAME_F_HW_I2C {
 public:
     Display();
     void setup();
     template <typename... Printables>
-    void printAll(Printables... args);
-    void displayColor(uint16_t color);
+    void print(Printables... args);
 
     bool enabled;
 
@@ -29,6 +20,10 @@ private:
     void printBuild();
     template <typename P, typename... Printables>
     void printBuild(P first, Printables... other);
+    template <typename... Printables>
+    void printBuild(const char *first, Printables... other);
+
+    uint8_t cursor;
 };
 
 #include "display.tpp"

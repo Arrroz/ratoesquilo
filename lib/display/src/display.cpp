@@ -1,22 +1,9 @@
 #include "display.hpp"
 
-#define I2C_DISPLAY_ADDR 0x3C // 0x3D: alternative address for other displays
-
-Display::Display() : Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT) {}
+Display::Display() : U8G2_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0) {}
 
 void Display::setup() {
-    if(!begin(SSD1306_SWITCHCAPVCC, I2C_DISPLAY_ADDR)) {
-        enabled = false;
-        return;
-    }
+    begin();
+    setFont(u8g2_font_heavybottom_tr);
     enabled = true;
-
-    setTextSize(2);
-    setTextColor(WHITE);
-}
-
-void Display::displayColor(uint16_t color) {
-    clearDisplay();
-    fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, color);
-    display();
 }
