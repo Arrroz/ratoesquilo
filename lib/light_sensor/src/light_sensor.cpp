@@ -2,41 +2,41 @@
 
 #define ILLUMINATED_LUX_DIFF 100
 
-bool usingLightSensor = true;
+#define BASELINE_READINGS_COUNT 50
 
-Adafruit_VEML7700 lightSensor;
-float baselineLux;
+LightSensor::LightSensor() {
+    enabled = false;
+}
 
-void setupLightSensor() {
-    if(!lightSensor.begin()) {
-        usingLightSensor = false;
+void LightSensor::setup() {
+    if(!begin())
         return;
-    }
 
     // get readings quicker to improve sampling rate
-    lightSensor.setIntegrationTime(VEML7700_IT_25MS);
+    setIntegrationTime(VEML7700_IT_25MS);
 
+    enabled = true;
+
+    // get some initial readings to establish the baseline
     baselineLux = 0;
-    uint8_t i;
-    for(i = 0; i < 50; i++) {
-      baselineLux += lightSensor.readLux();
-      delay(1);
+    for(uint16_t i = 0; i < BASELINE_READINGS_COUNT; i++) {
+        baselineLux += readLux() / BASELINE_READINGS_COUNT;
+        delay(1);
     }
-    baselineLux /= i;
 }
 
-float getLux() {
-    if(!usingLightSensor)
+float LightSensor::readLux() {
+    if(!enabled)
         return -1;
-    
-    return lightSensor.readLux();
+
+    return Adafruit_VEML7700::readLux();
 }
 
-uint8_t illuminated() {
-    if(!usingLightSensor)
+int8_t LightSensor::illuminated() {
+    if(!enabled)
         return -1;
 
-    if(getLux() - baselineLux > ILLUMINATED_LUX_DIFF)
+    if(readLux() - baselineLux > ILLUMINATED_LUX_DIFF)
         return 1;
     return 0;
 }

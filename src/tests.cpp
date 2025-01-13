@@ -20,10 +20,10 @@ void testDisplay(Display *display) {
     stage++;
 }
 
-void testLightSensor(Display *display) {
-    float lux = getLux();
+void testLightSensor(LightSensor *lightSensor, Display *display) {
+    float lux = lightSensor->readLux();
 
-    switch(illuminated()) {
+    switch(lightSensor->illuminated()) {
         case 1:
             if(display) display->print("Light On\n", lux);
             Serial.print("Light On\t");

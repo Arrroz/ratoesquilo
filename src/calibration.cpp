@@ -47,8 +47,8 @@ void calibrateLineSensors(LineSensors *lineSensors, Display *display) {
     }
 }
 
-void calibrateLightSensor(Display *display) {
-    float lux = getLux();
+void calibrateLightSensor(LightSensor *lightSensor, Display *display) {
+    float lux = lightSensor->readLux();
 
     if(lux == -1) {
         if(display) display->print("\nError");

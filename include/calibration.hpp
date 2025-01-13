@@ -9,7 +9,7 @@
 #define NUM_CALIBS 3
 
 void calibrateLineSensors(LineSensors *lineSensors, Display *display = NULL);
-void calibrateLightSensor(Display *display = NULL);
+void calibrateLightSensor(LightSensor *lightSensor, Display *display = NULL);
 void calibrateEncoders(Encoder *encoderL, Encoder *encoderR, Display *display = NULL);
 
 #endif

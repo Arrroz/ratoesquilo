@@ -10,7 +10,7 @@
 #define NUM_TESTS 5
 
 void testDisplay(Display *display);
-void testLightSensor(Display *display = NULL);
+void testLightSensor(LightSensor *lightSensor, Display *display = NULL);
 void testLineSensors(LineSensors *lineSensors, Display *display = NULL);
 void testEncoders(Encoder *encoderL, Encoder *encoderR, Display *display = NULL);
 void testMotors(Motor *motorL, Motor *motorR, Display *display = NULL);

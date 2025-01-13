@@ -23,6 +23,7 @@ Button btn1(PINOUT_BTN1, true), btn2(PINOUT_BTN2, true);
 Display display;
 
 LineSensors lineSensors(sizeof(PINOUT_LS_SENSORS)/sizeof(PINOUT_LS_SENSORS[0]), PINOUT_LS_SENSORS, PINOUT_LS_EMITTER_ODD, PINOUT_LS_EMITTER_EVEN);
+LightSensor lightSensor;
 Encoder encoderL(PINOUT_ENC_LA, PINOUT_ENC_LB);
 Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
 
@@ -44,7 +45,6 @@ float currTime, prevTime;
 
 // TODO: create robot class with robot state variables (position, orientation, velocities, velocities' references...)
 // TODO: create control file with functions for coordinated movement (PID on wheels, PID on robot state...)
-// TODO: turn light sensor into object
 // TODO: config files for spread out constants?
 
 #define BASE_SPEED 0.4
@@ -114,15 +114,12 @@ void wheelControl() {
 void setup() {
     // Hardware setup
     display.setup();
-
     display.print("\nSetting up...");
+
+    lightSensor.setup();
 
     Serial.begin(9600);
     while(!Serial);
-
-    setupLightSensor();
-    
-    delay(500);
 
     // Program initialization
     if(!dipswitch[0])
@@ -145,19 +142,13 @@ void loop() {
 
     switch(mode) {
     case race:
-        testLightSensor();
-        if(dipswitch[3])
-            display.print(getLux());
-        else
-            display.print("def ", 3, "a\nfgh");
-    
-        // static unsigned long t0, t1;
-        // t0 = micros();
-        // // motorControl();
-        // // wheelControl();
-        // lineSensors.update();
-        // t1 = micros();
-        // Serial.println(t1-t0);
+        static unsigned long t0, t1;
+        t0 = micros();
+        // motorControl();
+        // wheelControl();
+        lineSensors.update();
+        t1 = micros();
+        Serial.println(t1-t0);
         
         break;
     
@@ -172,7 +163,7 @@ void loop() {
             break;
         
         case 1:
-            testLightSensor(&display);
+            testLightSensor(&lightSensor, &display);
             break;
         
         case 2:
@@ -214,7 +205,7 @@ void loop() {
             break;
         
         case 1:
-            calibrateLightSensor(&display);
+            calibrateLightSensor(&lightSensor, &display);
             break;
         
         case 2:
