@@ -6,6 +6,7 @@
 
 class Encoder {
 public:
+    Encoder();
     Encoder(uint8_t pinA, uint8_t pinB);
     void updateSpeed(float dt = 1);
 

@@ -91,39 +91,54 @@ void testEncoders(Encoder *encoderL, Encoder *encoderR, Display *display) {
 }
 
 #define MOTORS_TEST_STAGE_SIZE 20
-#define MOTOR_TEST_SPEED 0.2
+#define MOTOR_TEST_SPEED 1.0
 void testMotors(Motor *motorL, Motor *motorR, Display *display) {
     static uint16_t stage = 0;
 
+    // if(stage < MOTORS_TEST_STAGE_SIZE) {
+    //     if(display) display->print("Motors\nLeft");
+    //     Serial.println("Left");
+    //     motorL->input = MOTOR_TEST_SPEED;
+    //     motorR->input = 0;
+    // }
+    // else if(stage < MOTORS_TEST_STAGE_SIZE*2) {
+    //     if(display) display->print("Motors\nRight");
+    //     Serial.println("Right");
+    //     motorL->input = 0;
+    //     motorR->input = MOTOR_TEST_SPEED;
+    // }
+    // else if(stage < MOTORS_TEST_STAGE_SIZE*3) {
+    //     if(display) display->print("Motors\nForward");
+    //     Serial.println("Forward");
+    //     motorL->input = MOTOR_TEST_SPEED;
+    //     motorR->input = MOTOR_TEST_SPEED;
+    // }
+    // else if(stage < MOTORS_TEST_STAGE_SIZE*4) {
+    //     if(display) display->print("Motors\nBack");
+    //     Serial.println("Back");
+    //     motorL->input = -MOTOR_TEST_SPEED;
+    //     motorR->input = -MOTOR_TEST_SPEED;
+    // }
+    // else if(stage < MOTORS_TEST_STAGE_SIZE*5) {
+    //     if(display) display->print("Motors\nStop");
+    //     Serial.println("Stop");
+    //     motorL->stop();
+    //     motorR->stop();
+    // }
+    // else
+    //     stage = 0;
+
     if(stage < MOTORS_TEST_STAGE_SIZE) {
-        if(display) display->print("Motors\nLeft");
-        Serial.println("Left");
+        if(display) display->print("Motors\nFront");
+        Serial.println("Front");
         motorL->input = MOTOR_TEST_SPEED;
-        motorR->input = 0;
+        motorR->input = MOTOR_TEST_SPEED;
     }
     else if(stage < MOTORS_TEST_STAGE_SIZE*2) {
-        if(display) display->print("Motors\nRight");
-        Serial.println("Right");
-        motorL->input = 0;
-        motorR->input = MOTOR_TEST_SPEED;
-    }
-    else if(stage < MOTORS_TEST_STAGE_SIZE*3) {
-        if(display) display->print("Motors\nForward");
-        Serial.println("Forward");
-        motorL->input = MOTOR_TEST_SPEED;
-        motorR->input = MOTOR_TEST_SPEED;
-    }
-    else if(stage < MOTORS_TEST_STAGE_SIZE*4) {
         if(display) display->print("Motors\nBack");
         Serial.println("Back");
-        motorL->input = -MOTOR_TEST_SPEED;
         motorR->input = -MOTOR_TEST_SPEED;
-    }
-    else if(stage < MOTORS_TEST_STAGE_SIZE*5) {
-        if(display) display->print("Motors\nStop");
-        Serial.println("Stop");
-        motorL->stop();
-        motorR->stop();
+        motorL->input = -MOTOR_TEST_SPEED;
     }
     else
         stage = 0;

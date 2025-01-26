@@ -40,6 +40,10 @@ void encodersISR() {
     encoderR.count += TRANSITION_TABLE[encoderR.state];
 }
 
+Encoder::Encoder() {
+    enabled = false;
+}
+
 Encoder::Encoder(uint8_t pinA, uint8_t pinB) : pinA(pinA), pinB(pinB) {
     pinMode(pinA, INPUT);
     pinMode(pinB, INPUT);
@@ -52,9 +56,14 @@ Encoder::Encoder(uint8_t pinA, uint8_t pinB) : pinA(pinA), pinB(pinB) {
 
     state = (digitalRead(pinA) << 1) + digitalRead(pinB);
     state = (state << 2) + state;
+
+    enabled = true;
 }
 
 void Encoder::updateSpeed(float dt) {
+    if(!enabled)
+        return;
+
     speed = count / (ENC_PULSES_PER_METER * dt);
     count = 0;
 }

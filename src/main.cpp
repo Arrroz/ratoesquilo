@@ -25,8 +25,10 @@ Display display;
 
 LineSensors lineSensors(sizeof(PINOUT_LS_SENSORS)/sizeof(PINOUT_LS_SENSORS[0]), PINOUT_LS_SENSORS, PINOUT_LS_EMITTER_ODD, PINOUT_LS_EMITTER_EVEN);
 LightSensor lightSensor;
-Encoder encoderL(PINOUT_ENC_LA, PINOUT_ENC_LB);
-Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
+// Encoder encoderL(PINOUT_ENC_LA, PINOUT_ENC_LB);
+// Encoder encoderR(PINOUT_ENC_RA, PINOUT_ENC_RB);
+Encoder encoderL;
+Encoder encoderR;
 
 Motor motorL(PINOUT_ML_PWM, PINOUT_ML_DIRF, PINOUT_ML_DIRB);
 Motor motorR(PINOUT_MR_PWM, PINOUT_MR_DIRF, PINOUT_MR_DIRB);
@@ -76,13 +78,13 @@ void loop() {
 
     switch(mode) {
     case race:
-        static unsigned long t0, t1;
-        t0 = micros();
-        // motorControl(&motorL, &motorR, &lineSensors, currTime-prevTime);
+        // static unsigned long t0, t1;
+        // t0 = micros();
+        motorControl(&motorL, &motorR, &lineSensors, currTime-prevTime);
         // wheelControl(&wheelL, &wheelR, &lineSensors, currTime-prevTime);
-        lineSensors.update();
-        t1 = micros();
-        Serial.println(t1-t0);
+        // lineSensors.update();
+        // t1 = micros();
+        // Serial.println(t1-t0);
         
         break;
     
