@@ -4,8 +4,9 @@
 #include <motors.hpp>
 #include <line_sensors.hpp>
 #include "wheel.hpp"
+#include "pid.hpp"
 
-void motorControl(Motor *motorL, Motor *motorR, LineSensors *lineSensors, float dt);
-void wheelControl(Wheel *wheelL, Wheel *wheelR, LineSensors *lineSensors, float dt);
+bool motorControl(Motor *motorL, Motor *motorR, LineSensors *lineSensors, PID_t *pid, float speed, float dt);
+bool wheelControl(Wheel *wheelL, Wheel *wheelR, LineSensors *lineSensors, PID_t *pid, float speed, float dt);
 
 #endif

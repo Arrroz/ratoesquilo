@@ -36,16 +36,39 @@ Motor motorR(PINOUT_MR_PWM, PINOUT_MR_DIRF, PINOUT_MR_DIRB);
 Wheel wheelL(&motorL, &encoderL);
 Wheel wheelR(&motorR, &encoderR);
 
+float baseSpeed = 0.5;
+PID_t speedDiffPD(10, 0, 2);
+
 enum Mode_t {
-    race, test, calib
+    race, test, calib, tune
 };
 Mode_t mode;
+
+enum State_t {
+    halt, drive
+};
+State_t state;
+
 int testNum = 0, calibNum = 0;
 
-#define TIME_INTERVAL 0.003 // in seconds
 float currTime, prevTime;
 
 // TODO: config files for spread out constants?
+
+void updateMode() {
+    if(!dipswitch[0]) {
+        if(!dipswitch[1])
+            mode = race;
+        else
+            mode = calib;
+    }
+    else {
+        if(!dipswitch[1])
+            mode = test;
+        else
+            mode = tune;
+    }
+}
 
 void setup() {
     // Hardware setup
@@ -58,12 +81,8 @@ void setup() {
     while(!Serial);
 
     // Program initialization
-    if(!dipswitch[0])
-        mode = race;
-    else if(!dipswitch[1])
-        mode = test;
-    else
-        mode = calib;
+    updateMode();
+    state = halt;
 
     currTime = millis()/1000.0;
 
@@ -73,18 +92,28 @@ void setup() {
 
 void loop() {
     prevTime = currTime;
-    while(currTime - prevTime < TIME_INTERVAL)
-        currTime = millis()/1000.0;
+    currTime = millis()/1000.0;
 
     switch(mode) {
     case race:
-        // static unsigned long t0, t1;
-        // t0 = micros();
-        motorControl(&motorL, &motorR, &lineSensors, currTime-prevTime);
-        // wheelControl(&wheelL, &wheelR, &lineSensors, currTime-prevTime);
-        // lineSensors.update();
-        // t1 = micros();
-        // Serial.println(t1-t0);
+        static long t0, t1;
+        t0 = micros();
+        if(state == halt) {
+            display.print("\nReady!");
+            if(btn1.read() || btn2.read()) {
+                state = drive;
+                delay(100);
+            }
+            updateMode();
+        }
+        else if(state == drive) {
+            static bool stopped;
+            stopped = motorControl(&motorL, &motorR, &lineSensors, &speedDiffPD, baseSpeed, currTime-prevTime);
+            // stopped = wheelControl(&wheelL, &wheelR, &lineSensors, &speedDiffPD, baseSpeed, currTime-prevTime);
+            if(stopped) state = halt;
+        }
+        t1 = micros();
+        Serial.println(t1-t0);
         
         break;
     
@@ -128,6 +157,8 @@ void loop() {
             motorR.update();
         }
 
+        updateMode();
+
         break;
     
     case calib:
@@ -155,9 +186,30 @@ void loop() {
         }
 
         break;
+
+    case tune:
+        display.print("Speed: ", baseSpeed, "\nKp: ", speedDiffPD.kp, "\nKd: ", speedDiffPD.kd);
+        if(!dipswitch[2]){
+            if(btn1.read()) baseSpeed += 0.05;
+            if(btn2.read()) baseSpeed -= 0.05;
+        }
+        else {
+            if(!dipswitch[3]) {
+                if(btn1.read()) speedDiffPD.kp += 0.1;
+                if(btn2.read()) speedDiffPD.kp -= 0.1;
+            }
+            else {
+                if(btn1.read()) speedDiffPD.kd += 0.1;
+                if(btn2.read()) speedDiffPD.kd -= 0.1;
+            }
+        }
+
+        break;
     
     default:
         display.print("\nUnknown mode");
         break;
     }
+
+    updateMode();
 }

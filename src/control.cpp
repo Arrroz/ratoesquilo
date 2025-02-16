@@ -1,9 +1,5 @@
 #include "control.hpp"
 
-#define BASE_SPEED 0.4
-#define KP 5
-#define KD 1
-
 void brake(Motor *motorL, Motor *motorR) {
     motorL->input = -1;
     motorR->input = -1;
@@ -18,46 +14,52 @@ void brake(Motor *motorL, Motor *motorR) {
     motorR->update();
 }
 
-void motorControl(Motor *motorL, Motor *motorR, LineSensors *lineSensors, float dt) {
-    static float prevLinePos = 0;
+bool motorControl(Motor *motorL, Motor *motorR, LineSensors *lineSensors, PID_t *pid, float speed, float dt) {
     static float speedDiff;
-
-    prevLinePos = lineSensors->linePos;
 
     lineSensors->update();
 
     if(lineSensors->fullLine || lineSensors->noLine) {
         brake(motorL, motorR);
-        while(true);
+        return true;
     }
 
-    speedDiff = KP*lineSensors->linePos + KD*(lineSensors->linePos-prevLinePos)/dt;
+    speedDiff = pid->update(0, lineSensors->linePos, dt);
 
-    motorL->input = BASE_SPEED - speedDiff;
-    motorR->input = BASE_SPEED + speedDiff;
+    motorL->input = speed;
+    motorR->input = speed;
+    if(speedDiff > 0)
+        motorR->input -= speedDiff;
+    else
+        motorL->input += speedDiff;
 
     motorL->update();
     motorR->update();
+
+    return false;
 }
 
-void wheelControl(Wheel *wheelL, Wheel *wheelR, LineSensors *lineSensors, float dt) {
-    static float prevLinePos = 0;
+bool wheelControl(Wheel *wheelL, Wheel *wheelR, LineSensors *lineSensors, PID_t *pid, float speed, float dt) {
     static float speedDiff;
-
-    prevLinePos = lineSensors->linePos;
 
     lineSensors->update();
 
     if(lineSensors->fullLine || lineSensors->noLine) {
         brake(wheelL->motor, wheelR->motor);
-        while(true);
+        return true;
     }
 
-    speedDiff = KP*lineSensors->linePos + KD*(lineSensors->linePos-prevLinePos)/dt;
+    speedDiff = pid->update(0, lineSensors->linePos, dt);
 
-    wheelL->refSpeed = BASE_SPEED - speedDiff;
-    wheelR->refSpeed = BASE_SPEED + speedDiff;
+    wheelL->refSpeed = speed;
+    wheelR->refSpeed = speed;
+    if(speedDiff > 0)
+        wheelR->refSpeed -= speedDiff;
+    else
+        wheelL->refSpeed += speedDiff;
 
     wheelL->update(dt);
     wheelR->update(dt);
+
+    return false;
 }

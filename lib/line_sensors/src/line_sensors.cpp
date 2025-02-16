@@ -1,7 +1,7 @@
 #include "line_sensors.hpp"
 
-#define LS_CALIB_MIN 33
-#define LS_CALIB_MAX 800
+#define LS_CALIB_MIN 20
+#define LS_CALIB_MAX 700
 
 #define LS_PITCH 0.004 // in meters
 
