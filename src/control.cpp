@@ -1,12 +1,14 @@
 #include "control.hpp"
 
-void brake(Motor *motorL, Motor *motorR) {
+#define MAX_MOTOR_ACC 1.0
+
+void brake(Motor *motorL, Motor *motorR, unsigned long duration) {
     motorL->input = -1;
     motorR->input = -1;
     motorL->update();
     motorR->update();
 
-    delay(400);
+    delay(duration);
 
     motorL->input = 0;
     motorR->input = 0;
@@ -15,14 +17,20 @@ void brake(Motor *motorL, Motor *motorR) {
 }
 
 bool motorControl(Motor *motorL, Motor *motorR, LineSensors *lineSensors, PID_t *pid, float speed, float dt) {
-    static float speedDiff;
+    static float speedDiff, prevSpeed = 0;
 
     lineSensors->update();
 
     if(lineSensors->fullLine || lineSensors->noLine) {
-        brake(motorL, motorR);
+        brake(motorL, motorR, speed*1000);
+        prevSpeed = 0;
         return true;
     }
+
+    // limit acceleration
+    if(speed-prevSpeed > MAX_MOTOR_ACC*dt)
+        speed = prevSpeed + MAX_MOTOR_ACC*dt;
+    prevSpeed = speed;
 
     speedDiff = pid->update(0, lineSensors->linePos, dt);
 
@@ -45,7 +53,7 @@ bool wheelControl(Wheel *wheelL, Wheel *wheelR, LineSensors *lineSensors, PID_t 
     lineSensors->update();
 
     if(lineSensors->fullLine || lineSensors->noLine) {
-        brake(wheelL->motor, wheelR->motor);
+        brake(wheelL->motor, wheelR->motor, speed*1000);
         return true;
     }
 

@@ -36,8 +36,8 @@ Motor motorR(PINOUT_MR_PWM, PINOUT_MR_DIRF, PINOUT_MR_DIRB);
 Wheel wheelL(&motorL, &encoderL);
 Wheel wheelR(&motorR, &encoderR);
 
-float baseSpeed = 0.5;
-PID_t speedDiffPD(10, 0, 2);
+float baseSpeed = 0.8;
+PID_t speedDiffPD(3, 0, 10);
 
 enum Mode_t {
     race, test, calib, tune
@@ -188,19 +188,19 @@ void loop() {
         break;
 
     case tune:
-        display.print("Speed: ", baseSpeed, "\nKp: ", speedDiffPD.kp, "\nKd: ", speedDiffPD.kd);
+        display.print("Speed: ", baseSpeed, "%\nKp: ", speedDiffPD.kp, "\nKd: ", speedDiffPD.kd);
         if(!dipswitch[2]){
             if(btn1.read()) baseSpeed += 0.05;
             if(btn2.read()) baseSpeed -= 0.05;
         }
         else {
             if(!dipswitch[3]) {
-                if(btn1.read()) speedDiffPD.kp += 0.1;
-                if(btn2.read()) speedDiffPD.kp -= 0.1;
+                if(btn1.read()) speedDiffPD.kp += 0.5;
+                if(btn2.read()) speedDiffPD.kp -= 0.5;
             }
             else {
-                if(btn1.read()) speedDiffPD.kd += 0.1;
-                if(btn2.read()) speedDiffPD.kd -= 0.1;
+                if(btn1.read()) speedDiffPD.kd += 0.5;
+                if(btn2.read()) speedDiffPD.kd -= 0.5;
             }
         }
 
