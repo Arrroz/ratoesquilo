@@ -1,6 +1,6 @@
 #include "light_sensor.hpp"
 
-#define ILLUMINATED_LUX_DIFF 100
+#define ILLUMINATED_LUX_DIFF 50
 
 #define BASELINE_READINGS_COUNT 50
 

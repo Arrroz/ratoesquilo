@@ -36,7 +36,7 @@ Motor motorR(PINOUT_MR_PWM, PINOUT_MR_DIRF, PINOUT_MR_DIRB);
 Wheel wheelL(&motorL, &encoderL);
 Wheel wheelR(&motorR, &encoderR);
 
-float baseSpeed = 0.8;
+float baseSpeed = 0.3;
 PID_t speedDiffPD(3, 0, 10);
 
 enum Mode_t {
@@ -51,7 +51,7 @@ State_t state;
 
 int testNum = 0, calibNum = 0;
 
-float currTime, prevTime;
+float currTime, prevTime, totalTime;
 
 // TODO: config files for spread out constants?
 
@@ -80,11 +80,15 @@ void setup() {
     Serial.begin(9600);
     while(!Serial);
 
+    // Decrease ADC prescaler to decrease sampling time
+    // ADCSRA &= ~(1 << ADPS2) & ~(1 << ADPS1) & ~(1 << ADPS0);
+
     // Program initialization
     updateMode();
     state = halt;
 
     currTime = millis()/1000.0;
+    totalTime = 0;
 
     display.print("\nReady!");
     Serial.println("Ready!");
@@ -93,27 +97,35 @@ void setup() {
 void loop() {
     prevTime = currTime;
     currTime = millis()/1000.0;
+    totalTime += currTime - prevTime;
 
     switch(mode) {
     case race:
-        static long t0, t1;
-        t0 = micros();
+        // static long t0, t1;
+        // t0 = micros();
         if(state == halt) {
             display.print("\nReady!");
-            if(btn1.read() || btn2.read()) {
+            if(lightSensor.illuminated()) {
+                baseSpeed = 0.75;
+                totalTime = 0;
                 state = drive;
-                delay(100);
+            }
+            if(btn1.read() || btn2.read()) {
+                baseSpeed = 0.1;
+                totalTime = 0;
+                state = drive;
             }
             updateMode();
         }
         else if(state == drive) {
             static bool stopped;
+            if(totalTime > 2.1) baseSpeed = 0.1;
             stopped = motorControl(&motorL, &motorR, &lineSensors, &speedDiffPD, baseSpeed, currTime-prevTime);
             // stopped = wheelControl(&wheelL, &wheelR, &lineSensors, &speedDiffPD, baseSpeed, currTime-prevTime);
             if(stopped) state = halt;
         }
-        t1 = micros();
-        Serial.println(t1-t0);
+        // t1 = micros();
+        // Serial.println(t1-t0);
         
         break;
     
@@ -188,7 +200,7 @@ void loop() {
         break;
 
     case tune:
-        display.print("Speed: ", baseSpeed, "%\nKp: ", speedDiffPD.kp, "\nKd: ", speedDiffPD.kd);
+        display.print("Speed: ", baseSpeed, "\nKp: ", speedDiffPD.kp, "\nKd: ", speedDiffPD.kd);
         if(!dipswitch[2]){
             if(btn1.read()) baseSpeed += 0.05;
             if(btn2.read()) baseSpeed -= 0.05;
