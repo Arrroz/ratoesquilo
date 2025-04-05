@@ -1,6 +1,7 @@
 #include "control.hpp"
 
-#define MAX_MOTOR_ACC 0.8
+#define MAX_MOTOR_ACC 2.0
+#define MIN_MOTOR_ACC -0.5
 
 void brake(Motor *motorL, Motor *motorR, unsigned long duration) {
     motorL->input = -1;
@@ -14,6 +15,7 @@ void brake(Motor *motorL, Motor *motorR, unsigned long duration) {
     motorR->input = 0;
     motorL->update();
     motorR->update();
+    while(true);
 }
 
 bool motorControl(Motor *motorL, Motor *motorR, LineSensors *lineSensors, PID_t *pid, float speed, float dt) {
@@ -30,18 +32,20 @@ bool motorControl(Motor *motorL, Motor *motorR, LineSensors *lineSensors, PID_t 
     // limit acceleration
     if(speed-prevSpeed > MAX_MOTOR_ACC*dt)
     speed = prevSpeed + MAX_MOTOR_ACC*dt;
-    if(speed-prevSpeed < -MAX_MOTOR_ACC*dt)
-        speed = prevSpeed - MAX_MOTOR_ACC*dt;
+    if(speed-prevSpeed < MIN_MOTOR_ACC*dt)
+        speed = prevSpeed + MIN_MOTOR_ACC*dt;
     prevSpeed = speed;
 
     speedDiff = pid->update(0, lineSensors->linePos, dt);
 
     motorL->input = speed;
     motorR->input = speed;
-    if(speedDiff > 0)
-        motorR->input -= speedDiff;
-    else
-        motorL->input += speedDiff;
+    // if(speedDiff > 0)
+    //     motorR->input -= speedDiff;
+    // else
+    //     motorL->input += speedDiff;
+    motorL->input += speedDiff/2;
+    motorR->input -= speedDiff/2;
 
     motorL->update();
     motorR->update();

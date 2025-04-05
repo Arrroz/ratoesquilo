@@ -36,8 +36,10 @@ Motor motorR(PINOUT_MR_PWM, PINOUT_MR_DIRF, PINOUT_MR_DIRB);
 Wheel wheelL(&motorL, &encoderL);
 Wheel wheelR(&motorR, &encoderR);
 
-float baseSpeed = 0.3;
-PID_t speedDiffPD(3, 0, 10);
+float highSpeed = 0.75;
+float lowSpeed = 0.3;
+float highSpeedTime = 0.75;
+PID_t speedDiffPD(3, 0, 3);
 
 enum Mode_t {
     race, test, calib, tune
@@ -45,7 +47,7 @@ enum Mode_t {
 Mode_t mode;
 
 enum State_t {
-    halt, drive
+    halt, starting, drive_slow, drive_fast
 };
 State_t state;
 
@@ -94,6 +96,7 @@ void setup() {
     Serial.println("Ready!");
 }
 
+
 void loop() {
     prevTime = currTime;
     currTime = millis()/1000.0;
@@ -101,29 +104,56 @@ void loop() {
 
     switch(mode) {
     case race:
-        // static long t0, t1;
-        // t0 = micros();
-        if(state == halt) {
+        static bool stopped;
+
+        switch(state) {
+            case halt:
             display.print("\nReady!");
-            if(lightSensor.illuminated()) {
-                baseSpeed = 0.75;
+
+            if(debugSw.read()) highSpeedTime = 1.5;
+            else highSpeedTime = 0.75;
+            
+            if(lightSensor.illuminated() == 1) {
                 totalTime = 0;
-                state = drive;
+                state = starting;
             }
             if(btn1.read() || btn2.read()) {
-                baseSpeed = 0.1;
                 totalTime = 0;
-                state = drive;
+                state = drive_slow;
             }
+
             updateMode();
-        }
-        else if(state == drive) {
-            static bool stopped;
-            if(totalTime > 2.1) baseSpeed = 0.1;
-            stopped = motorControl(&motorL, &motorR, &lineSensors, &speedDiffPD, baseSpeed, currTime-prevTime);
-            // stopped = wheelControl(&wheelL, &wheelR, &lineSensors, &speedDiffPD, baseSpeed, currTime-prevTime);
+            
+            break;
+        
+        case(starting):
+            motorL.input = highSpeed;
+            motorR.input = highSpeed;
+            motorL.update();
+            motorR.update();
+
+            lineSensors.update();
+            if(!lineSensors.fullLine)
+                state = drive_fast;
+
+            break;
+
+        case(drive_fast):
+            stopped = motorControl(&motorL, &motorR, &lineSensors, &speedDiffPD, highSpeed, currTime-prevTime);
             if(stopped) state = halt;
+            else if(totalTime > highSpeedTime) state = drive_slow;
+
+        case(drive_slow):
+            stopped = motorControl(&motorL, &motorR, &lineSensors, &speedDiffPD, lowSpeed, currTime-prevTime);
+            if(stopped) state = halt;
+
+            break;
+        
+        default:
+            state = halt;
+            break;
         }
+
         // t1 = micros();
         // Serial.println(t1-t0);
         
@@ -200,21 +230,77 @@ void loop() {
         break;
 
     case tune:
-        display.print("Speed: ", baseSpeed, "\nKp: ", speedDiffPD.kp, "\nKd: ", speedDiffPD.kd);
-        if(!dipswitch[2]){
-            if(btn1.read()) baseSpeed += 0.05;
-            if(btn2.read()) baseSpeed -= 0.05;
-        }
-        else {
-            if(!dipswitch[3]) {
+        static int8_t tunedVariable = 0;
+        
+        switch(tunedVariable) {
+        case 0:
+            display.print("\nHigh Speed:\n", highSpeed);
+            if(dipswitch[2]) {
+                if(btn1.read()) highSpeed += 0.05;
+                if(btn2.read()) highSpeed -= 0.05;
+            }
+            break;
+
+        case 1:
+            display.print("\nLow Speed:\n", lowSpeed);
+            if(dipswitch[2]) {
+                if(btn1.read()) lowSpeed += 0.05;
+                if(btn2.read()) lowSpeed -= 0.05;
+            }
+            break;
+
+        case 2:
+            display.print("\nHigh Speed\nTime: ", highSpeedTime);
+            if(dipswitch[2]) {
+                if(btn1.read()) highSpeedTime += 0.05;
+                if(btn2.read()) highSpeedTime -= 0.05;
+            }
+            break;
+
+        case 3:
+            display.print("\nKp: ", speedDiffPD.kp);
+            if(dipswitch[2]) {
                 if(btn1.read()) speedDiffPD.kp += 0.5;
                 if(btn2.read()) speedDiffPD.kp -= 0.5;
             }
-            else {
+            break;
+
+        case 4:
+            display.print("\nKd: ", speedDiffPD.kd);
+            if(dipswitch[2]) {
                 if(btn1.read()) speedDiffPD.kd += 0.5;
                 if(btn2.read()) speedDiffPD.kd -= 0.5;
             }
+            break;
+
+        default:
+            tunedVariable = 0;
+            break;
         }
+
+        if(!dipswitch[2]) {
+            if(btn1.read()) tunedVariable++;
+            if(btn2.read()) tunedVariable--;
+
+            if(tunedVariable > 4) tunedVariable = 0;
+            if(tunedVariable < 0) tunedVariable = 4;
+        }
+
+        // display.print("Speed: ", baseSpeed, "\nKp: ", speedDiffPD.kp, "\nKd: ", speedDiffPD.kd);
+        // if(!dipswitch[2]){
+        //     if(btn1.read()) baseSpeed += 0.05;
+        //     if(btn2.read()) baseSpeed -= 0.05;
+        // }
+        // else {
+        //     if(!dipswitch[3]) {
+        //         if(btn1.read()) speedDiffPD.kp += 0.5;
+        //         if(btn2.read()) speedDiffPD.kp -= 0.5;
+        //     }
+        //     else {
+        //         if(btn1.read()) speedDiffPD.kd += 0.5;
+        //         if(btn2.read()) speedDiffPD.kd -= 0.5;
+        //     }
+        // }
 
         break;
     
